@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Modelo para empresas (multitenant)
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  cnpj      String   @unique
+  email     String   @unique
+  password  String
+  address   String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  users      User[]
+  trucks     Truck[]
+  employees  Employee[]
+  routes     Route[]
+
+  @@map("companies")
+}
+
+// Modelo para usuários da empresa
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String @default("EMPLOYEE")
+  companyId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("users")
+}
+
+// Modelo para caminhões
+model Truck {
+  id           String        @id @default(cuid())
+  plate        String        @unique // Placa do caminhão
+  model        String
+  capacity    Float         // Capacidade em toneladas
+  year        Int
+  isAvailable Boolean       @default(true)
+  companyId   String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relacionamentos
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  routes  Route[]
+
+  @@map("trucks")
+}
+
+// Modelo para funcionários (motoristas e ajudantes)
+model Employee {
+  id           String        @id @default(cuid())
+  name         String
+  cpf          String        @unique
+  function     String
+  phone        String?
+  email        String?
+  isAvailable  Boolean       @default(true)
+  companyId    String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  // Relacionamentos
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driverRoutes Route[] @relation("DriverRoutes")
+  helperRoutes Route[] @relation("HelperRoutes")
+
+  @@map("employees")
+}
+
+// Modelo para rotas
+model Route {
+  id          String      @id @default(cuid())
+  origin      String      // Origem da rota
+  destination String      // Destino da rota
+  date        DateTime    // Data da rota
+  shift       String      // Turno (manhã, tarde, noite)
+  status      String      @default("SCHEDULED")
+  notes       String?
+  companyId   String
+  truckId     String
+  driverId    String      // ID do motorista
+  helperId    String      // ID do ajudante
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relacionamentos
+  company Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  truck   Truck     @relation(fields: [truckId], references: [id])
+  driver  Employee  @relation("DriverRoutes", fields: [driverId], references: [id])
+  helper  Employee  @relation("HelperRoutes", fields: [helperId], references: [id])
+
+  @@map("routes")
+}
+
+// Comentários sobre os valores das strings
+// UserRole: "ADMIN", "MANAGER", "EMPLOYEE"
+// EmployeeFunction: "DRIVER", "HELPER"
+// Shift: "MORNING", "AFTERNOON", "NIGHT"
+// RouteStatus: "SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"
