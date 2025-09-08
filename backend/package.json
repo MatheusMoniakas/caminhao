@@ -2,10 +2,10 @@
   "name": "gestao-rotas-backend",
   "version": "1.0.0",
   "description": "Backend da API para sistema de gestão de rotas de caminhões",
-  "main": "src/server.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "build": "prisma generate",
     "migrate": "prisma migrate dev",
     "generate": "prisma generate",
