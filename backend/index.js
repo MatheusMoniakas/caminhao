@@ -7,12 +7,12 @@ require('dotenv').config();
 let authRoutes, empresaRoutes, caminhaoRoutes, funcionarioRoutes, rotaRoutes, relatorioRoutes;
 
 try {
-  authRoutes = require('./routes/auth');
-  empresaRoutes = require('./routes/empresa');
-  caminhaoRoutes = require('./routes/caminhao');
-  funcionarioRoutes = require('./routes/funcionario');
-  rotaRoutes = require('./routes/rota');
-  relatorioRoutes = require('./routes/relatorio');
+  authRoutes = require('./src/routes/auth');
+  empresaRoutes = require('./src/routes/companies');
+  caminhaoRoutes = require('./src/routes/trucks');
+  funcionarioRoutes = require('./src/routes/employees');
+  rotaRoutes = require('./src/routes/routes');
+  // relatorioRoutes = require('./src/routes/relatorio'); // Não existe ainda
 } catch (error) {
   console.error('Erro ao carregar rotas:', error.message);
 }
