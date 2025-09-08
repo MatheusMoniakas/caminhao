@@ -3,6 +3,12 @@ const cors = require('cors');
 const helmet = require('helmet');
 require('dotenv').config();
 
+// Configurações para Vercel
+if (process.env.VERCEL) {
+  console.log('🚀 Executando no Vercel');
+  console.log('Environment:', process.env.NODE_ENV);
+}
+
 // Import routes with error handling
 let authRoutes, empresaRoutes, caminhaoRoutes, funcionarioRoutes, rotaRoutes, relatorioRoutes;
 
@@ -52,6 +58,15 @@ if (caminhaoRoutes) app.use('/api/caminhoes', caminhaoRoutes);
 if (funcionarioRoutes) app.use('/api/funcionarios', funcionarioRoutes);
 if (rotaRoutes) app.use('/api/rotas', rotaRoutes);
 if (relatorioRoutes) app.use('/api/relatorios', relatorioRoutes);
+
+// Log das rotas carregadas
+console.log('Rotas carregadas:');
+if (authRoutes) console.log('✓ /api/auth');
+if (empresaRoutes) console.log('✓ /api/empresa');
+if (caminhaoRoutes) console.log('✓ /api/caminhoes');
+if (funcionarioRoutes) console.log('✓ /api/funcionarios');
+if (rotaRoutes) console.log('✓ /api/rotas');
+if (relatorioRoutes) console.log('✓ /api/relatorios');
 
 // Error handling middleware
 app.use((err, req, res, next) => {

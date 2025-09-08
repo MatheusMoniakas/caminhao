@@ -42,10 +42,13 @@ let routes = [];
 
 // Auth Routes
 app.post('/api/auth/register', [
-  body('nome').notEmpty().withMessage('Nome é obrigatório'),
-  body('email').isEmail().withMessage('Email inválido'),
-  body('senha').isLength({ min: 6 }).withMessage('Senha deve ter pelo menos 6 caracteres'),
-  body('empresa').notEmpty().withMessage('Nome da empresa é obrigatório')
+  body('company.name').notEmpty().withMessage('Nome da empresa é obrigatório'),
+  body('company.cnpj').notEmpty().withMessage('CNPJ é obrigatório'),
+  body('company.email').isEmail().withMessage('Email da empresa deve ser válido'),
+  body('company.password').isLength({ min: 6 }).withMessage('Senha deve ter pelo menos 6 caracteres'),
+  body('user.name').notEmpty().withMessage('Nome do usuário é obrigatório'),
+  body('user.email').isEmail().withMessage('Email do usuário deve ser válido'),
+  body('user.password').isLength({ min: 6 }).withMessage('Senha do usuário deve ter pelo menos 6 caracteres')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -53,52 +56,70 @@ app.post('/api/auth/register', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { nome, email, senha, empresa } = req.body;
+    const { company, user } = req.body;
+
+    // Verificar se empresa já existe
+    const existingCompany = companies.find(c => c.cnpj === company.cnpj || c.email === company.email);
+    if (existingCompany) {
+      return res.status(400).json({ error: 'Empresa já cadastrada com este CNPJ ou email' });
+    }
 
     // Verificar se usuário já existe
-    const existingUser = users.find(u => u.email === email);
+    const existingUser = users.find(u => u.email === user.email);
     if (existingUser) {
-      return res.status(400).json({ error: 'Usuário já existe' });
+      return res.status(400).json({ error: 'Usuário já cadastrado com este email' });
     }
 
     // Criar empresa
     const companyId = companies.length + 1;
+    const companyPasswordHash = await bcrypt.hash(company.password, 10);
     const newCompany = {
       id: companyId,
-      nome: empresa,
+      name: company.name,
+      cnpj: company.cnpj,
+      email: company.email,
+      password: companyPasswordHash,
+      address: company.address,
+      phone: company.phone,
       createdAt: new Date().toISOString()
     };
     companies.push(newCompany);
 
     // Criar usuário
-    const hashedPassword = await bcrypt.hash(senha, 10);
+    const userPasswordHash = await bcrypt.hash(user.password, 10);
     const userId = users.length + 1;
     const newUser = {
       id: userId,
-      nome,
-      email,
-      senha: hashedPassword,
-      empresaId: companyId,
+      name: user.name,
+      email: user.email,
+      password: userPasswordHash,
+      role: 'ADMIN',
+      companyId: companyId,
       createdAt: new Date().toISOString()
     };
     users.push(newUser);
 
     // Gerar token
     const token = jwt.sign(
-      { userId: newUser.id, empresaId: companyId },
+      { userId: newUser.id, companyId: companyId },
       process.env.JWT_SECRET || 'fallback-secret',
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
     res.status(201).json({
-      message: 'Usuário criado com sucesso',
+      message: 'Empresa e usuário criados com sucesso',
+      token,
       user: {
         id: newUser.id,
-        nome: newUser.nome,
+        name: newUser.name,
         email: newUser.email,
-        empresa: newCompany.nome
+        role: newUser.role
       },
-      token
+      company: {
+        id: newCompany.id,
+        name: newCompany.name,
+        cnpj: newCompany.cnpj
+      }
     });
   } catch (error) {
     console.error('Erro no registro:', error);
@@ -107,8 +128,8 @@ app.post('/api/auth/register', [
 });
 
 app.post('/api/auth/login', [
-  body('email').isEmail().withMessage('Email inválido'),
-  body('senha').notEmpty().withMessage('Senha é obrigatória')
+  body('email').isEmail().withMessage('Email deve ser válido'),
+  body('password').notEmpty().withMessage('Senha é obrigatória')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -116,39 +137,44 @@ app.post('/api/auth/login', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, senha } = req.body;
+    const { email, password } = req.body;
 
     // Buscar usuário
     const user = users.find(u => u.email === email);
     if (!user) {
-      return res.status(401).json({ error: 'Credenciais inválidas' });
+      return res.status(401).json({ error: 'Email ou senha incorretos' });
     }
 
     // Verificar senha
-    const validPassword = await bcrypt.compare(senha, user.senha);
+    const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(401).json({ error: 'Credenciais inválidas' });
+      return res.status(401).json({ error: 'Email ou senha incorretos' });
     }
 
     // Buscar empresa
-    const company = companies.find(c => c.id === user.empresaId);
+    const company = companies.find(c => c.id === user.companyId);
 
     // Gerar token
     const token = jwt.sign(
-      { userId: user.id, empresaId: user.empresaId },
+      { userId: user.id, companyId: user.companyId },
       process.env.JWT_SECRET || 'fallback-secret',
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
     res.json({
       message: 'Login realizado com sucesso',
+      token,
       user: {
         id: user.id,
-        nome: user.nome,
+        name: user.name,
         email: user.email,
-        empresa: company?.nome
+        role: user.role
       },
-      token
+      company: company ? {
+        id: company.id,
+        name: company.name,
+        cnpj: company.cnpj
+      } : null
     });
   } catch (error) {
     console.error('Erro no login:', error);
