@@ -7,12 +7,12 @@ require('dotenv').config();
 let authRoutes, empresaRoutes, caminhaoRoutes, funcionarioRoutes, rotaRoutes, relatorioRoutes;
 
 try {
-  authRoutes = require('./routes/auth');
-  empresaRoutes = require('./routes/empresa');
-  caminhaoRoutes = require('./routes/caminhao');
-  funcionarioRoutes = require('./routes/funcionario');
-  rotaRoutes = require('./routes/rota');
-  relatorioRoutes = require('./routes/relatorio');
+  authRoutes = require('../src/routes/auth');
+  empresaRoutes = require('../src/routes/companies');
+  caminhaoRoutes = require('../src/routes/trucks');
+  funcionarioRoutes = require('../src/routes/employees');
+  rotaRoutes = require('../src/routes/routes');
+  // relatorioRoutes = require('../src/routes/relatorio'); // Não existe ainda
 } catch (error) {
   console.error('Erro ao carregar rotas:', error.message);
 }
@@ -57,7 +57,6 @@ if (relatorioRoutes) app.use('/api/relatorios', relatorioRoutes);
 app.use((err, req, res, next) => {
   console.error('Erro na aplicação:', err);
   
-  // Ensure response is sent as JSON string
   const errorResponse = {
     error: 'Erro interno do servidor',
     message: process.env.NODE_ENV === 'development' ? err.message : 'Algo deu errado',
@@ -75,14 +74,5 @@ app.use('*', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-
-// For Vercel, don't start server if this is a serverless function
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-  const PORT = process.env.PORT || 3001;
-  app.listen(PORT, () => {
-    console.log(`🚛 Servidor rodando na porta ${PORT}`);
-    console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
-  });
-}
 
 module.exports = app;
