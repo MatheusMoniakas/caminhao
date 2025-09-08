@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "test-deployment.js",
+      "src": "api/index.js",
       "use": "@vercel/node"
     },
     {
@@ -16,13 +16,11 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/test-deployment.js"
+      "dest": "/api/index.js"
     },
     {
       "src": "/(.*)",
       "dest": "/frontend/dist/$1"
     }
-  ],
-  "installCommand": "npm run install:all",
-  "buildCommand": "npm run build"
+  ]
 }
