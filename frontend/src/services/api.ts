@@ -207,6 +207,46 @@ class ApiService {
     const response = await this.api.get(`/route-executions/route/${routeId}`);
     return response.data;
   }
+
+  // Employee methods
+  async createEmployee(data: {
+    name: string;
+    email: string;
+    password: string;
+    role?: string;
+  }) {
+    const response = await this.api.post('/employees', data);
+    return response.data;
+  }
+
+  async getAllEmployees() {
+    const response = await this.api.get('/employees');
+    return response.data;
+  }
+
+  async getEmployeeById(id: string) {
+    const response = await this.api.get(`/employees/${id}`);
+    return response.data;
+  }
+
+  async updateEmployee(id: string, data: {
+    name?: string;
+    email?: string;
+    role?: string;
+  }) {
+    const response = await this.api.put(`/employees/${id}`, data);
+    return response.data;
+  }
+
+  async deleteEmployee(id: string) {
+    const response = await this.api.delete(`/employees/${id}`);
+    return response.data;
+  }
+
+  async toggleEmployeeStatus(id: string) {
+    const response = await this.api.patch(`/employees/${id}/toggle-status`);
+    return response.data;
+  }
 }
 
 export const apiService = new ApiService();
