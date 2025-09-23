@@ -24,7 +24,8 @@
     "check-setup": "node scripts/check-setup.js",
     "test-database": "node scripts/test-database.js",
     "create-admin": "cd backend && npm run create-admin",
-    "prepare-deploy": "node scripts/deploy-frontend.js"
+    "prepare-deploy": "node scripts/deploy-frontend.js",
+    "deploy-frontend": "node scripts/deploy-frontend-only.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
