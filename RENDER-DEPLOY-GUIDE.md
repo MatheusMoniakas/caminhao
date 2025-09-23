@@ -132,3 +132,4 @@ Após o deploy bem-sucedido:
 **URLs de exemplo:**
 - Backend: `https://caminhao-backend.onrender.com`
 - Frontend: `https://caminhao-frontend.netlify.app`
+
