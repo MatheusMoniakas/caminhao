@@ -1,0 +1,24 @@
+{
+  "name": "caminhao-backend-render",
+  "version": "1.0.0",
+  "description": "Backend API para sistema de gestão de rotas de caminhões - Render Build",
+  "main": "backend/dist/index.js",
+  "scripts": {
+    "build": "cd backend && npm install && npm run build",
+    "start": "cd backend && npm start"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "typescript",
+    "api",
+    "postgresql",
+    "supabase",
+    "jwt"
+  ],
+  "author": "Matheus",
+  "license": "MIT"
+}
