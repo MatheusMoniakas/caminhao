@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MapPin, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Search, Filter, MapPin, Trash2, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AddRouteModal from '@/components/AddRouteModal';
 import apiService from '@/services/api';
