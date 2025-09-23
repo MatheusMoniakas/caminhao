@@ -20,6 +20,11 @@ function fixImportsInFile(filePath) {
     let content = fs.readFileSync(filePath, 'utf8');
     let modified = false;
 
+    // Calcular o caminho relativo baseado na localização do arquivo
+    const fileDir = path.dirname(filePath);
+    const distDir = path.join(__dirname, '..', 'dist');
+    const relativeToDist = path.relative(fileDir, distDir);
+
     // Substituir imports com path mapping
     for (const [alias, relativePath] of Object.entries(pathMappings)) {
       const regex = new RegExp(`require\\("${alias.replace('@', '\\@')}([^"]*)"\\)`, 'g');
@@ -27,7 +32,10 @@ function fixImportsInFile(filePath) {
         modified = true;
         // Adicionar .js se não tiver extensão
         const finalSuffix = suffix && !suffix.endsWith('.js') ? `${suffix}.js` : suffix;
-        return `require("${relativePath}${finalSuffix}")`;
+        // Calcular o caminho relativo correto
+        const targetPath = path.join(distDir, relativePath.replace('./', ''), finalSuffix || 'index.js');
+        const calculatedRelativePath = path.relative(fileDir, targetPath).replace(/\\/g, '/');
+        return `require("${calculatedRelativePath}")`;
       });
       content = newContent;
     }
