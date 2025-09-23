@@ -6,6 +6,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { config } from '@/config';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandler';
+import { authenticateToken } from '@/middleware/auth';
 
 // Import routes
 import authRoutes from '@/routes/auth';
@@ -67,6 +68,16 @@ app.get('/api/test', (req, res) => {
   res.json({
     success: true,
     message: 'API is working',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Test endpoint (with auth required)
+app.get('/api/test-auth', authenticateToken, (req, res) => {
+  res.json({
+    success: true,
+    message: 'Auth is working',
+    user: req.user,
     timestamp: new Date().toISOString()
   });
 });
