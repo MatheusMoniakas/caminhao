@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Trash2 } from 'lucide-react';
+import { Plus, Search, Filter, Trash2, FileText, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AddEmployeeModal from '@/components/AddEmployeeModal';
 import apiService from '@/services/api';
@@ -11,6 +11,7 @@ interface Employee {
   role: string;
   isActive: boolean;
   createdAt: string;
+  updatedAt?: string;
 }
 
 const Employees: React.FC = () => {
@@ -72,6 +73,70 @@ const Employees: React.FC = () => {
         toast.error(errorMessage);
       }
     }
+  };
+
+  const generateEmployeePDF = (employee: Employee) => {
+    const { jsPDF } = require('jspdf');
+    const doc = new jsPDF();
+
+    // Configurações do documento
+    doc.setFontSize(20);
+    doc.text('Sistema de Gestão de Rotas', 20, 30);
+    
+    doc.setFontSize(16);
+    doc.text('Dados do Funcionário', 20, 50);
+
+    // Dados do funcionário
+    doc.setFontSize(12);
+    doc.text(`Nome: ${employee.name}`, 20, 70);
+    doc.text(`Email: ${employee.email}`, 20, 80);
+    doc.text(`Função: ${employee.role === 'admin' ? 'Administrador' : employee.role === 'driver' ? 'Motorista' : 'Funcionário'}`, 20, 90);
+    doc.text(`Status: ${employee.isActive ? 'Ativo' : 'Inativo'}`, 20, 100);
+    doc.text(`Data de Admissão: ${new Date(employee.createdAt).toLocaleDateString('pt-BR')}`, 20, 110);
+    
+    if (!employee.isActive && employee.updatedAt) {
+      doc.text(`Data de Demissão: ${new Date(employee.updatedAt).toLocaleDateString('pt-BR')}`, 20, 120);
+    }
+
+    // Data de geração
+    doc.text(`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, 140);
+
+    // Salvar o PDF
+    doc.save(`funcionario_${employee.name.replace(/\s+/g, '_')}.pdf`);
+    toast.success('PDF gerado com sucesso!');
+  };
+
+  const generateDismissalLetter = (employee: Employee) => {
+    const { jsPDF } = require('jspdf');
+    const doc = new jsPDF();
+
+    // Cabeçalho da empresa
+    doc.setFontSize(16);
+    doc.text('Sistema de Gestão de Rotas', 20, 30);
+    doc.text('Carta de Demissão', 20, 45);
+
+    // Data
+    doc.setFontSize(12);
+    doc.text(`${new Date().toLocaleDateString('pt-BR')}`, 150, 30);
+
+    // Corpo da carta
+    doc.text('Prezado(a) Sr(a).', 20, 70);
+    doc.text(employee.name, 20, 80);
+
+    doc.text('Informamos que, conforme procedimentos internos da empresa,', 20, 100);
+    doc.text('seu vínculo empregatício foi encerrado em', 20, 110);
+    doc.text(`${new Date(employee.updatedAt || new Date()).toLocaleDateString('pt-BR')}.`, 20, 120);
+
+    doc.text('Agradecemos pelos serviços prestados e desejamos sucesso', 20, 140);
+    doc.text('em seus futuros empreendimentos.', 20, 150);
+
+    doc.text('Atenciosamente,', 20, 170);
+    doc.text('Administração', 20, 180);
+    doc.text('Sistema de Gestão de Rotas', 20, 190);
+
+    // Salvar o PDF
+    doc.save(`carta_demissao_${employee.name.replace(/\s+/g, '_')}.pdf`);
+    toast.success('Carta de demissão gerada com sucesso!');
   };
 
   const filteredEmployees = employees.filter(employee => {
@@ -198,7 +263,10 @@ const Employees: React.FC = () => {
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Data de Criação
+                      Data de Admissão
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Data de Demissão
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Ações
@@ -251,8 +319,25 @@ const Employees: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(employee.createdAt).toLocaleDateString('pt-BR')}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {!employee.isActive && employee.updatedAt ? 
+                          new Date(employee.updatedAt).toLocaleDateString('pt-BR') : 
+                          '-'
+                        }
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
+                          <button
+                            onClick={() => employee.isActive ? generateEmployeePDF(employee) : generateDismissalLetter(employee)}
+                            className={`${
+                              employee.isActive 
+                                ? 'text-blue-600 hover:text-blue-900' 
+                                : 'text-orange-600 hover:text-orange-900'
+                            }`}
+                            title={employee.isActive ? 'Gerar relatório do funcionário' : 'Gerar carta de demissão'}
+                          >
+                            {employee.isActive ? <FileText className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+                          </button>
                           <button
                             onClick={() => handleDeleteEmployee(employee.id, employee.name)}
                             className="text-red-600 hover:text-red-900"
