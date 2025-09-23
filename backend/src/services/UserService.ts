@@ -113,6 +113,23 @@ export class UserService {
     return data.map(user => this.mapUserFromDatabase(user));
   }
 
+  async getUserByEmailWithPassword(email: string): Promise<any | null> {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // User not found
+      }
+      throw new Error(`Failed to get user: ${error.message}`);
+    }
+
+    return data;
+  }
+
   async verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(plainPassword, hashedPassword);
   }

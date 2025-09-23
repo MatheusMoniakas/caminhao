@@ -16,60 +16,68 @@ export interface AuthRequest extends Request {
   user: User;
 }
 
-export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
+export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
   if (!token) {
-    return res.status(401).json({
+    res.status(401).json({
       success: false,
       error: 'Access token required'
     });
+    return;
   }
 
   try {
     const decoded = jwt.verify(token, config.jwt.secret) as any;
-    req.user = decoded.user;
+    (req as AuthRequest).user = decoded.user;
     next();
   } catch (error) {
-    return res.status(403).json({
+    res.status(403).json({
       success: false,
       error: 'Invalid or expired token'
     });
+    return;
   }
 };
 
-export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.user) {
-    return res.status(401).json({
+export const requireAdmin = (req: Request, res: Response, next: NextFunction): void => {
+  const authReq = req as AuthRequest;
+  if (!authReq.user) {
+    res.status(401).json({
       success: false,
       error: 'Authentication required'
     });
+    return;
   }
 
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({
+  if (authReq.user.role !== 'admin') {
+    res.status(403).json({
       success: false,
       error: 'Admin access required'
     });
+    return;
   }
 
   next();
 };
 
-export const requireEmployee = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.user) {
-    return res.status(401).json({
+export const requireEmployee = (req: Request, res: Response, next: NextFunction): void => {
+  const authReq = req as AuthRequest;
+  if (!authReq.user) {
+    res.status(401).json({
       success: false,
       error: 'Authentication required'
     });
+    return;
   }
 
-  if (req.user.role !== 'employee' && req.user.role !== 'admin') {
-    return res.status(403).json({
+  if (authReq.user.role !== 'employee' && authReq.user.role !== 'admin') {
+    res.status(403).json({
       success: false,
       error: 'Employee access required'
     });
+    return;
   }
 
   next();

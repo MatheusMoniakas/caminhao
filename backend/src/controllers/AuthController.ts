@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '@/config';
 import { UserService } from '@/services/UserService';
-import { LoginRequest, RegisterRequest, AuthTokens, ApiResponse } from '@/types';
+import { LoginRequest, RegisterRequest, AuthTokens, ApiResponse, User } from '@/types';
 
 export class AuthController {
   private userService: UserService;
@@ -26,11 +26,7 @@ export class AuthController {
       }
 
       // Get user with password for verification
-      const { data: userWithPassword } = await this.userService['supabaseAdmin']
-        .from('users')
-        .select('*')
-        .eq('email', email)
-        .single();
+      const userWithPassword = await this.userService.getUserByEmailWithPassword(email);
 
       if (!userWithPassword) {
         res.status(401).json({
@@ -177,26 +173,21 @@ export class AuthController {
   }
 
   private generateTokens(user: User): AuthTokens {
-    const accessToken = jwt.sign(
-      { 
-        userId: user.id,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          isActive: user.isActive
-        }
-      },
-      config.jwt.secret,
-      { expiresIn: config.jwt.expiresIn }
-    );
+    const payload = { 
+      userId: user.id,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        isActive: user.isActive
+      }
+    };
 
-    const refreshToken = jwt.sign(
-      { userId: user.id },
-      config.jwt.refreshSecret,
-      { expiresIn: config.jwt.refreshExpiresIn }
-    );
+    const refreshPayload = { userId: user.id };
+
+    const accessToken = (jwt.sign as any)(payload, config.jwt.secret, { expiresIn: config.jwt.expiresIn });
+    const refreshToken = (jwt.sign as any)(refreshPayload, config.jwt.refreshSecret, { expiresIn: config.jwt.refreshExpiresIn });
 
     return { accessToken, refreshToken };
   }
