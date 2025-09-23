@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Search, Filter, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AddEmployeeModal from '@/components/AddEmployeeModal';
 import apiService from '@/services/api';
