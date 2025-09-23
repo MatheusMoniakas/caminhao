@@ -14,6 +14,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "create-admin": "node scripts/create-admin.js",
+    "create-tables": "node scripts/create-tables.js",
     "postbuild": "echo 'Build completed successfully!'"
   },
   "dependencies": {

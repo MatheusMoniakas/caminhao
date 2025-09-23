@@ -12,6 +12,19 @@ import Employees from '@/pages/Employees';
 import RoutesPage from '@/pages/Routes';
 import MyRoutes from '@/pages/MyRoutes';
 
+// Navigate based on user role
+const NavigateToRoleBasedRoute: React.FC = () => {
+  const { user } = useAuth();
+  
+  if (user?.role === 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  } else if (user?.role === 'employee') {
+    return <Navigate to="/my-routes" replace />;
+  } else {
+    return <Navigate to="/login" replace />;
+  }
+};
+
 // Protected Route Component
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -89,7 +102,7 @@ const App: React.FC = () => {
       <Route 
         path="/dashboard" 
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adminOnly>
             <Dashboard />
           </ProtectedRoute>
         } 
@@ -123,10 +136,10 @@ const App: React.FC = () => {
       />
 
       {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<NavigateToRoleBasedRoute />} />
       
-      {/* 404 - redirect to dashboard */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* 404 - redirect based on role */}
+      <Route path="*" element={<NavigateToRoleBasedRoute />} />
     </Routes>
   );
 };

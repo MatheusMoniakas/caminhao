@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -10,7 +10,6 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { useState } from 'react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -23,7 +22,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
+    { name: 'Dashboard', href: '/dashboard', icon: BarChart3, adminOnly: true },
     { name: 'Funcionários', href: '/employees', icon: Users, adminOnly: true },
     { name: 'Rotas', href: '/routes', icon: MapPin, adminOnly: true },
     { name: 'Minhas Rotas', href: '/my-routes', icon: Truck, employeeOnly: true },
