@@ -25,7 +25,9 @@ function fixImportsInFile(filePath) {
       const regex = new RegExp(`require\\("${alias.replace('@', '\\@')}([^"]*)"\\)`, 'g');
       const newContent = content.replace(regex, (match, suffix) => {
         modified = true;
-        return `require("${relativePath}${suffix}")`;
+        // Adicionar .js se não tiver extensão
+        const finalSuffix = suffix && !suffix.endsWith('.js') ? `${suffix}.js` : suffix;
+        return `require("${relativePath}${finalSuffix}")`;
       });
       content = newContent;
     }
