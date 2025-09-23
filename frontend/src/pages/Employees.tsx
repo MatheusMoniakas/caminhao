@@ -45,9 +45,12 @@ const Employees: React.FC = () => {
 
   const handleToggleStatus = async (id: string) => {
     try {
+      const employee = employees.find(emp => emp.id === id);
+      const newStatus = employee?.isActive ? 'desativado' : 'ativado';
+      
       const response = await apiService.toggleEmployeeStatus(id);
       if (response.success) {
-        toast.success('Status do funcionário atualizado!');
+        toast.success(`Funcionário ${newStatus} com sucesso!`);
         loadEmployees();
       }
     } catch (error: any) {
@@ -204,10 +207,17 @@ const Employees: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredEmployees.map((employee) => (
-                    <tr key={employee.id} className="hover:bg-gray-50">
+                    <tr key={employee.id} className={`hover:bg-gray-50 ${!employee.isActive ? 'bg-gray-50 opacity-75' : ''}`}>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {employee.name}
+                        <div className="flex items-center">
+                          <div className="text-sm font-medium text-gray-900">
+                            {employee.name}
+                          </div>
+                          {!employee.isActive && (
+                            <span className="ml-2 text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                              DESATIVADO
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -221,14 +231,21 @@ const Employees: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
-                          onClick={() => handleToggleStatus(employee.id)}
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          onClick={() => {
+                            const action = employee.isActive ? 'desativar' : 'ativar';
+                            const confirmMessage = `Tem certeza que deseja ${action} o funcionário ${employee.name}?`;
+                            if (window.confirm(confirmMessage)) {
+                              handleToggleStatus(employee.id);
+                            }
+                          }}
+                          className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full transition-colors duration-200 ${
                             employee.isActive
-                              ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                              : 'bg-red-100 text-red-800 hover:bg-red-200'
+                              ? 'bg-green-100 text-green-800 hover:bg-green-200 border border-green-300'
+                              : 'bg-red-100 text-red-800 hover:bg-red-200 border border-red-300'
                           }`}
+                          title={employee.isActive ? 'Clique para desativar' : 'Clique para ativar'}
                         >
-                          {employee.isActive ? 'Ativo' : 'Inativo'}
+                          {employee.isActive ? '✅ Ativo' : '❌ Inativo'}
                         </button>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
