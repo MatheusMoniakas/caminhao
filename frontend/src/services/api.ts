@@ -22,6 +22,7 @@ class ApiService {
     // Request interceptor to add auth token
     this.api.interceptors.request.use(
       (config) => {
+        console.log('Request interceptor called for:', config.url);
         const token = localStorage.getItem('accessToken');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;

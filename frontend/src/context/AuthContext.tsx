@@ -52,6 +52,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('refreshToken', refreshToken);
         setUser(userData);
         
+        // Verify tokens were saved
+        const savedToken = localStorage.getItem('accessToken');
+        console.log('Token saved verification:', savedToken ? savedToken.substring(0, 20) + '...' : 'null');
+        
         toast.success(`Bem-vindo, ${userData.name}!`);
       } else {
         throw new Error(response.error || 'Login failed');
