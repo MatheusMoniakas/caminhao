@@ -1,0 +1,122 @@
+import { supabaseAdmin } from '@/config/database';
+import { Route, CreateRouteRequest, UpdateRouteRequest } from '@/types';
+
+export class RouteService {
+  async createRoute(routeData: CreateRouteRequest): Promise<Route> {
+    const { data, error } = await supabaseAdmin
+      .from('routes')
+      .insert({
+        name: routeData.name,
+        description: routeData.description,
+        start_point: routeData.startPoint,
+        end_point: routeData.endPoint,
+        waypoints: routeData.waypoints || [],
+        assigned_employee_id: routeData.assignedEmployeeId,
+        is_active: true
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create route: ${error.message}`);
+    }
+
+    return this.mapRouteFromDatabase(data);
+  }
+
+  async getRouteById(id: string): Promise<Route | null> {
+    const { data, error } = await supabaseAdmin
+      .from('routes')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // Route not found
+      }
+      throw new Error(`Failed to get route: ${error.message}`);
+    }
+
+    return this.mapRouteFromDatabase(data);
+  }
+
+  async getAllRoutes(): Promise<Route[]> {
+    const { data, error } = await supabaseAdmin
+      .from('routes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to get routes: ${error.message}`);
+    }
+
+    return data.map(route => this.mapRouteFromDatabase(route));
+  }
+
+  async getRoutesByEmployee(employeeId: string): Promise<Route[]> {
+    const { data, error } = await supabaseAdmin
+      .from('routes')
+      .select('*')
+      .eq('assigned_employee_id', employeeId)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to get routes by employee: ${error.message}`);
+    }
+
+    return data.map(route => this.mapRouteFromDatabase(route));
+  }
+
+  async updateRoute(id: string, updates: UpdateRouteRequest): Promise<Route> {
+    const updateData: any = {};
+    
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.startPoint !== undefined) updateData.start_point = updates.startPoint;
+    if (updates.endPoint !== undefined) updateData.end_point = updates.endPoint;
+    if (updates.waypoints !== undefined) updateData.waypoints = updates.waypoints;
+    if (updates.assignedEmployeeId !== undefined) updateData.assigned_employee_id = updates.assignedEmployeeId;
+    if (updates.isActive !== undefined) updateData.is_active = updates.isActive;
+
+    const { data, error } = await supabaseAdmin
+      .from('routes')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update route: ${error.message}`);
+    }
+
+    return this.mapRouteFromDatabase(data);
+  }
+
+  async deleteRoute(id: string): Promise<void> {
+    const { error } = await supabaseAdmin
+      .from('routes')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Failed to delete route: ${error.message}`);
+    }
+  }
+
+  private mapRouteFromDatabase(data: any): Route {
+    return {
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      startPoint: data.start_point,
+      endPoint: data.end_point,
+      waypoints: data.waypoints || [],
+      assignedEmployeeId: data.assigned_employee_id,
+      isActive: data.is_active,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
+    };
+  }
+}

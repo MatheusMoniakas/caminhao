@@ -1,5 +1,0 @@
-[33mbeec0c6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m fix: Corrigir problemas identificados pelo ChatGPT
-[33m4a0df51[m fix: Tentar configuração mínima para resolver erro 404
-[33m984bfae[m fix: Simplificar configuração do Vercel para resolver erro 404
-[33mf6393d6[m fix: Corrigir erro 404 do frontend no Vercel
-[33mfbbb104[m fix: Corrigir problemas de deployment no Vercel

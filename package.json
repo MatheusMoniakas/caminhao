@@ -1,36 +1,48 @@
 {
-  "name": "gestao-rotas-caminhoes",
+  "name": "caminhao-fullstack",
   "version": "1.0.0",
-  "description": "Sistema completo para gestão de rotas de caminhões",
+  "description": "Sistema de gestão de rotas para caminhões - Fullstack com React + Node.js",
   "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
-    "build": "npm run build:backend && npm run build:frontend",
-    "build:backend": "cd backend && npm run build",
+    "dev:backend": "cd backend && npm run dev",
+    "build": "npm run build:frontend && npm run build:backend",
     "build:frontend": "cd frontend && npm run build",
-    "start": "cd backend && npm start",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "helmet": "^7.1.0",
-    "dotenv": "^16.3.1",
-    "jsonwebtoken": "^9.0.2",
-    "bcryptjs": "^2.4.3",
-    "express-validator": "^7.0.1",
-    "prisma": "^5.7.1",
-    "@prisma/client": "^5.7.1"
+    "build:backend": "cd backend && npm run build",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd backend && npm run lint",
+    "format": "npm run format:frontend && npm run format:backend",
+    "format:frontend": "cd frontend && npm run format",
+    "format:backend": "cd backend && npm run format",
+    "check-setup": "node scripts/check-setup.js",
+    "test-database": "node scripts/test-database.js",
+    "create-admin": "cd backend && npm run create-admin",
+    "prepare-deploy": "node scripts/deploy-frontend.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
-  "keywords": ["gestao", "rotas", "caminhoes", "transporte", "react", "nodejs"],
-  "author": "Desenvolvedor",
+  "keywords": [
+    "react",
+    "typescript",
+    "nodejs",
+    "express",
+    "postgresql",
+    "supabase",
+    "jwt",
+    "fullstack"
+  ],
+  "author": "Matheus",
   "license": "MIT"
 }

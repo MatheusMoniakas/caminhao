@@ -1,14 +1,16 @@
 {
-  "name": "gestao-rotas-frontend",
-  "private": true,
+  "name": "caminhao-frontend",
   "version": "1.0.0",
+  "description": "Frontend para sistema de gestão de rotas de caminhões",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "vercel-build": "vite build"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\"",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -16,8 +18,8 @@
     "react-router-dom": "^6.20.1",
     "axios": "^1.6.2",
     "react-hook-form": "^7.48.2",
+    "react-query": "^3.39.3",
     "react-hot-toast": "^2.4.1",
-    "date-fns": "^2.30.0",
     "lucide-react": "^0.294.0",
     "clsx": "^2.0.0",
     "tailwind-merge": "^2.0.0"
@@ -25,15 +27,29 @@
   "devDependencies": {
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
     "@vitejs/plugin-react": "^4.1.1",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.53.0",
-    "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
     "postcss": "^8.4.31",
+    "prettier": "^3.1.0",
     "tailwindcss": "^3.3.5",
-    "vite": "^5.0.0"
-  }
+    "typescript": "^5.2.2",
+    "vite": "^4.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "react",
+    "typescript",
+    "vite",
+    "tailwindcss",
+    "frontend"
+  ],
+  "author": "Matheus",
+  "license": "MIT"
 }
-
