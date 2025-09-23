@@ -76,8 +76,8 @@ const Employees: React.FC = () => {
   };
 
   const generateEmployeePDF = (employee: Employee) => {
-    const { jsPDF } = require('jspdf');
-    const doc = new jsPDF();
+    import('jspdf').then(({ jsPDF }) => {
+      const doc = new jsPDF();
 
     // Configurações do documento
     doc.setFontSize(20);
@@ -101,14 +101,18 @@ const Employees: React.FC = () => {
     // Data de geração
     doc.text(`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, 140);
 
-    // Salvar o PDF
-    doc.save(`funcionario_${employee.name.replace(/\s+/g, '_')}.pdf`);
-    toast.success('PDF gerado com sucesso!');
+      // Salvar o PDF
+      doc.save(`funcionario_${employee.name.replace(/\s+/g, '_')}.pdf`);
+      toast.success('PDF gerado com sucesso!');
+    }).catch((error) => {
+      console.error('Erro ao gerar PDF:', error);
+      toast.error('Erro ao gerar PDF');
+    });
   };
 
   const generateDismissalLetter = (employee: Employee) => {
-    const { jsPDF } = require('jspdf');
-    const doc = new jsPDF();
+    import('jspdf').then(({ jsPDF }) => {
+      const doc = new jsPDF();
 
     // Cabeçalho da empresa
     doc.setFontSize(16);
@@ -134,9 +138,13 @@ const Employees: React.FC = () => {
     doc.text('Administração', 20, 180);
     doc.text('Sistema de Gestão de Rotas', 20, 190);
 
-    // Salvar o PDF
-    doc.save(`carta_demissao_${employee.name.replace(/\s+/g, '_')}.pdf`);
-    toast.success('Carta de demissão gerada com sucesso!');
+      // Salvar o PDF
+      doc.save(`carta_demissao_${employee.name.replace(/\s+/g, '_')}.pdf`);
+      toast.success('Carta de demissão gerada com sucesso!');
+    }).catch((error) => {
+      console.error('Erro ao gerar carta de demissão:', error);
+      toast.error('Erro ao gerar carta de demissão');
+    });
   };
 
   const filteredEmployees = employees.filter(employee => {
