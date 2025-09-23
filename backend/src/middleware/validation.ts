@@ -34,12 +34,14 @@ export const createEmployeeSchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
+  role: Joi.string().valid('admin', 'employee', 'driver').optional(),
   phone: Joi.string().optional()
 });
 
 export const updateEmployeeSchema = Joi.object({
   name: Joi.string().min(2).max(100).optional(),
   email: Joi.string().email().optional(),
+  role: Joi.string().valid('admin', 'employee', 'driver').optional(),
   phone: Joi.string().optional(),
   isActive: Joi.boolean().optional()
 });
