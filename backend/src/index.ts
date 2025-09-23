@@ -63,6 +63,23 @@ app.get('/health', (req, res) => {
   });
 });
 
+// API info endpoint
+app.get('/api', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Caminhão API is running',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      employees: '/api/employees',
+      routes: '/api/routes',
+      test: '/api/test',
+      testAuth: '/api/test-auth'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Test endpoint (no auth required)
 app.get('/api/test', (req, res) => {
   res.json({
