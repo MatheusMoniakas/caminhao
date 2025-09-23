@@ -35,7 +35,9 @@ function fixImportsInFile(filePath) {
         // Calcular o caminho relativo correto
         const targetPath = path.join(distDir, relativePath.replace('./', ''), finalSuffix || 'index.js');
         const calculatedRelativePath = path.relative(fileDir, targetPath).replace(/\\/g, '/');
-        return `require("${calculatedRelativePath}")`;
+        // Garantir que o caminho comece com ./
+        const finalPath = calculatedRelativePath.startsWith('./') ? calculatedRelativePath : `./${calculatedRelativePath}`;
+        return `require("${finalPath}")`;
       });
       content = newContent;
     }
