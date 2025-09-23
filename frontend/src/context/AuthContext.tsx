@@ -43,6 +43,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.success) {
         const { user: userData, accessToken, refreshToken } = response.data;
         
+        console.log('Login successful, saving tokens:', {
+          accessToken: accessToken ? accessToken.substring(0, 20) + '...' : 'null',
+          refreshToken: refreshToken ? refreshToken.substring(0, 20) + '...' : 'null'
+        });
+        
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
         setUser(userData);
