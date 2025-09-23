@@ -62,6 +62,15 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Test endpoint (no auth required)
+app.get('/api/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API is working',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
