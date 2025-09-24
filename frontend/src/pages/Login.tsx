@@ -20,7 +20,9 @@ const Login: React.FC = () => {
 
     try {
       await login(email, password);
-      navigate('/dashboard');
+      // O redirecionamento será feito automaticamente pelo App.tsx
+      // baseado no role do usuário através do NavigateToRoleBasedRoute
+      navigate('/');
     } catch (error) {
       // Error is handled by the auth context
     }

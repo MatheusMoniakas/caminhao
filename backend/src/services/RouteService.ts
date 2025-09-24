@@ -3,22 +3,28 @@ import { Route, CreateRouteRequest, UpdateRouteRequest } from '@/types';
 
 export class RouteService {
   async createRoute(routeData: CreateRouteRequest): Promise<Route> {
+    // Preparar dados para inserção, convertendo strings vazias para null
+    const insertData = {
+      name: routeData.name,
+      description: routeData.description && routeData.description.trim() !== '' ? routeData.description : null,
+      start_point: routeData.startPoint && routeData.startPoint.trim() !== '' ? routeData.startPoint : null,
+      end_point: routeData.endPoint && routeData.endPoint.trim() !== '' ? routeData.endPoint : null,
+      waypoints: routeData.waypoints && routeData.waypoints.length > 0 ? routeData.waypoints : [],
+      driver_id: routeData.driverId,
+      helper_id: routeData.helperId && routeData.helperId.trim() !== '' ? routeData.helperId : null,
+      is_active: true
+    };
+
+    console.log('Inserting route data:', insertData);
+
     const { data, error } = await supabaseAdmin
       .from('routes')
-      .insert({
-        name: routeData.name,
-        description: routeData.description,
-        start_point: routeData.startPoint,
-        end_point: routeData.endPoint,
-        waypoints: routeData.waypoints || [],
-        driver_id: routeData.driverId,
-        helper_id: routeData.helperId,
-        is_active: true
-      })
+      .insert(insertData)
       .select()
       .single();
 
     if (error) {
+      console.error('Database error:', error);
       throw new Error(`Failed to create route: ${error.message}`);
     }
 

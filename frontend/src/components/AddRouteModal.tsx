@@ -35,7 +35,7 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
 }) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
-  const [waypoints, setWaypoints] = useState<string[]>(['']);
+  const [waypoints, setWaypoints] = useState<string[]>([]);
 
   const {
     register,
@@ -83,17 +83,27 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
   const onSubmit = async (data: RouteFormData) => {
     setLoading(true);
     try {
+      // Filtrar waypoints vazios e garantir que temos pelo menos um array
+      const filteredWaypoints = waypoints.filter(wp => wp.trim() !== '');
+      
       const routeData = {
-        ...data,
-        waypoints: waypoints.filter(wp => wp.trim() !== '')
+        name: data.name,
+        description: data.description || undefined,
+        startPoint: data.startPoint || undefined,
+        endPoint: data.endPoint || undefined,
+        waypoints: filteredWaypoints.length > 0 ? filteredWaypoints : undefined,
+        driverId: data.driverId,
+        helperId: data.helperId || undefined
       };
+
+      console.log('Dados da rota sendo enviados:', routeData);
 
       const response = await apiService.createRoute(routeData);
       
       if (response.success) {
         toast.success('Rota criada com sucesso!');
         reset();
-        setWaypoints(['']);
+        setWaypoints([]);
         onRouteCreated();
         onClose();
       } else {
@@ -101,7 +111,8 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
       }
     } catch (error: any) {
       console.error('Erro ao criar rota:', error);
-      toast.error(error.response?.data?.error || 'Erro ao criar rota');
+      const errorMessage = error.response?.data?.error || error.message || 'Erro ao criar rota';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -193,18 +204,22 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
             {/* Pontos de Parada */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Pontos de Parada
+                Pontos de Parada (opcional)
               </label>
-              {waypoints.map((waypoint, index) => (
-                <div key={index} className="flex items-center space-x-2 mb-2">
-                  <input
-                    type="text"
-                    value={waypoint}
-                    onChange={(e) => updateWaypoint(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                    placeholder={`Ponto de parada ${index + 1}`}
-                  />
-                  {waypoints.length > 1 && (
+              {waypoints.length === 0 ? (
+                <div className="text-sm text-gray-500 mb-2">
+                  Nenhum ponto de parada adicionado. Clique em "Adicionar Ponto" para incluir paradas na rota.
+                </div>
+              ) : (
+                waypoints.map((waypoint, index) => (
+                  <div key={index} className="flex items-center space-x-2 mb-2">
+                    <input
+                      type="text"
+                      value={waypoint}
+                      onChange={(e) => updateWaypoint(index, e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      placeholder={`Ponto de parada ${index + 1}`}
+                    />
                     <button
                       type="button"
                       onClick={() => removeWaypoint(index)}
@@ -212,9 +227,9 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
-                  )}
-                </div>
-              ))}
+                  </div>
+                ))
+              )}
               <button
                 type="button"
                 onClick={addWaypoint}

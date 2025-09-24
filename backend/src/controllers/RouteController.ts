@@ -12,6 +12,8 @@ export class RouteController {
   async createRoute(req: Request, res: Response): Promise<void> {
     try {
       const routeData: CreateRouteRequest = req.body;
+      console.log('Creating route with data:', routeData);
+      
       const route = await this.routeService.createRoute(routeData);
 
       res.status(201).json({
@@ -19,8 +21,18 @@ export class RouteController {
         data: route,
         message: 'Route created successfully'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Create route error:', error);
+      
+      // Se for erro de validação do banco, retornar 400
+      if (error.message && error.message.includes('Failed to create route')) {
+        res.status(400).json({
+          success: false,
+          error: error.message
+        });
+        return;
+      }
+      
       res.status(500).json({
         success: false,
         error: 'Internal server error'

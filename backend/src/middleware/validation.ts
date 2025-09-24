@@ -48,12 +48,12 @@ export const updateEmployeeSchema = Joi.object({
 
 export const createRouteSchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
-  description: Joi.string().max(500).optional(),
-  startPoint: Joi.string().min(2).max(100).optional(),
-  endPoint: Joi.string().min(2).max(100).optional(),
-  waypoints: Joi.array().items(Joi.string()).optional(),
+  description: Joi.string().max(500).allow('').optional(),
+  startPoint: Joi.string().min(2).max(100).allow('').optional(),
+  endPoint: Joi.string().min(2).max(100).allow('').optional(),
+  waypoints: Joi.array().items(Joi.string().min(1)).optional(),
   driverId: Joi.string().uuid().required(),
-  helperId: Joi.string().uuid().optional()
+  helperId: Joi.string().uuid().allow('').optional()
 });
 
 export const updateRouteSchema = Joi.object({
