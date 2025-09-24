@@ -12,6 +12,8 @@ export class RouteService {
       waypoints: routeData.waypoints && routeData.waypoints.length > 0 ? routeData.waypoints : [],
       driver_id: routeData.driverId,
       helper_id: routeData.helperId && routeData.helperId.trim() !== '' ? routeData.helperId : null,
+      scheduled_date: routeData.scheduledDate,
+      shift: routeData.shift,
       is_active: true
     };
 
@@ -123,6 +125,8 @@ export class RouteService {
       waypoints: data.waypoints || [],
       driverId: data.driver_id,
       helperId: data.helper_id,
+      scheduledDate: data.scheduled_date,
+      shift: data.shift,
       isActive: data.is_active,
       createdAt: data.created_at,
       updatedAt: data.updated_at

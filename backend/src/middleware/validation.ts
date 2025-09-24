@@ -53,7 +53,9 @@ export const createRouteSchema = Joi.object({
   endPoint: Joi.string().min(2).max(100).allow('').optional(),
   waypoints: Joi.array().items(Joi.string().min(1)).optional(),
   driverId: Joi.string().uuid().required(),
-  helperId: Joi.string().uuid().allow('').optional()
+  helperId: Joi.string().uuid().allow('').optional(),
+  scheduledDate: Joi.string().isoDate().required(),
+  shift: Joi.string().valid('manha', 'tarde', 'noite', 'madrugada').required()
 });
 
 export const updateRouteSchema = Joi.object({
@@ -64,6 +66,8 @@ export const updateRouteSchema = Joi.object({
   waypoints: Joi.array().items(Joi.string()).optional(),
   driverId: Joi.string().uuid().optional(),
   helperId: Joi.string().uuid().optional(),
+  scheduledDate: Joi.string().isoDate().optional(),
+  shift: Joi.string().valid('manha', 'tarde', 'noite', 'madrugada').optional(),
   isActive: Joi.boolean().optional()
 });
 

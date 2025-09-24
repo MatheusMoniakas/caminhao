@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   Moon,
-  Sun
+  Sun,
+  AlertTriangle
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -29,6 +30,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: 'Dashboard', href: '/dashboard', icon: BarChart3, adminOnly: true },
     { name: 'Funcionários', href: '/employees', icon: Users, adminOnly: true },
     { name: 'Rotas', href: '/routes', icon: MapPin, adminOnly: true },
+    { name: 'Problemas', href: '/problems', icon: AlertTriangle, adminOnly: true },
     { name: 'Minhas Rotas', href: '/my-routes', icon: Truck, employeeOnly: true },
   ];
 

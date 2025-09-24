@@ -12,6 +12,7 @@ import Dashboard from '@/pages/Dashboard';
 import Employees from '@/pages/Employees';
 import RoutesPage from '@/pages/Routes';
 import MyRoutes from '@/pages/MyRoutes';
+import Problems from '@/pages/Problems';
 
 // Navigate based on user role
 const NavigateToRoleBasedRoute: React.FC = () => {
@@ -124,6 +125,15 @@ const App: React.FC = () => {
         element={
           <ProtectedRoute adminOnly>
             <RoutesPage />
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/problems" 
+        element={
+          <ProtectedRoute adminOnly>
+            <Problems />
           </ProtectedRoute>
         } 
       />

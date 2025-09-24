@@ -28,6 +28,8 @@ export interface Route {
   waypoints: string[];
   driverId: string;
   helperId?: string;
+  scheduledDate?: string;
+  shift?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -84,6 +86,8 @@ export interface CreateRouteRequest {
   waypoints?: string[];
   driverId: string;
   helperId?: string;
+  scheduledDate?: string;
+  shift?: string;
 }
 
 export interface UpdateRouteRequest {
@@ -94,6 +98,8 @@ export interface UpdateRouteRequest {
   waypoints?: string[];
   driverId?: string;
   helperId?: string;
+  scheduledDate?: string;
+  shift?: string;
   isActive?: boolean;
 }
 
