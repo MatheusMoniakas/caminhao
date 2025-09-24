@@ -65,7 +65,7 @@ export class RouteService {
     const { data, error } = await supabaseAdmin
       .from('routes')
       .select('*')
-      .eq('assigned_employee_id', employeeId)
+      .or(`driver_id.eq.${employeeId},helper_id.eq.${employeeId}`)
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 

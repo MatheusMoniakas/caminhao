@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MapPin, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Search, Filter, MapPin, Trash2, Play, CheckCircle, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AddRouteModal from '@/components/AddRouteModal';
 import apiService from '@/services/api';
@@ -26,9 +26,22 @@ interface Route {
   updatedAt: string;
 }
 
+interface RouteExecution {
+  id: string;
+  routeId: string;
+  employeeId: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  startTime?: string;
+  endTime?: string;
+  observations?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const Routes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [routes, setRoutes] = useState<Route[]>([]);
+  const [executions, setExecutions] = useState<RouteExecution[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -40,9 +53,17 @@ const Routes: React.FC = () => {
   const loadRoutes = async () => {
     setLoading(true);
     try {
-      const response = await apiService.getRoutes();
-      if (response.success) {
-        setRoutes(response.data);
+      const [routesResponse, executionsResponse] = await Promise.all([
+        apiService.getRoutes(),
+        apiService.getRouteExecutions()
+      ]);
+      
+      if (routesResponse.success) {
+        setRoutes(routesResponse.data);
+      }
+      
+      if (executionsResponse.success) {
+        setExecutions(executionsResponse.data);
       }
     } catch (error) {
       console.error('Erro ao carregar rotas:', error);
@@ -56,20 +77,30 @@ const Routes: React.FC = () => {
     loadRoutes();
   };
 
-  const handleToggleStatus = async (routeId: string, currentStatus: boolean) => {
-    try {
-      const response = await apiService.toggleRouteStatus(routeId);
-      if (response.success) {
-        toast.success(`Rota ${currentStatus ? 'desativada' : 'ativada'} com sucesso!`);
-        loadRoutes();
-      } else {
-        toast.error(response.error || 'Erro ao alterar status da rota');
-      }
-    } catch (error: any) {
-      console.error('Erro ao alterar status da rota:', error);
-      toast.error(error.response?.data?.error || 'Erro ao alterar status da rota');
-    }
+  const getRouteExecutionStatus = (routeId: string) => {
+    const execution = executions.find(exec => exec.routeId === routeId);
+    return execution?.status || 'pending';
   };
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, text: 'Pendente' },
+      in_progress: { color: 'bg-blue-100 text-blue-800', icon: Play, text: 'Em Execução' },
+      completed: { color: 'bg-green-100 text-green-800', icon: CheckCircle, text: 'Concluída' },
+      cancelled: { color: 'bg-red-100 text-red-800', icon: Clock, text: 'Cancelada' }
+    };
+
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
+    const Icon = config.icon;
+
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+        <Icon className="h-3 w-3 mr-1" />
+        {config.text}
+      </span>
+    );
+  };
+
 
   const handleDeleteRoute = async (routeId: string, routeName: string) => {
     if (window.confirm(`Tem certeza que deseja excluir a rota "${routeName}"?`)) {
@@ -220,11 +251,9 @@ const Routes: React.FC = () => {
                           <h3 className="text-lg font-medium text-gray-900">
                             {route.name}
                           </h3>
-                          {!route.isActive && (
-                            <span className="ml-2 text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
-                              INATIVA
-                            </span>
-                          )}
+                          <div className="ml-3">
+                            {getStatusBadge(getRouteExecutionStatus(route.id))}
+                          </div>
                         </div>
                         <div className="mt-1 text-sm text-gray-500">
                           {route.startPoint && <p><strong>De:</strong> {route.startPoint}</p>}
@@ -245,17 +274,6 @@ const Routes: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleToggleStatus(route.id, route.isActive)}
-                        className={`${
-                          route.isActive 
-                            ? 'text-orange-600 hover:text-orange-900' 
-                            : 'text-green-600 hover:text-green-900'
-                        }`}
-                        title={route.isActive ? 'Desativar rota' : 'Ativar rota'}
-                      >
-                        {route.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
                       <button
                         onClick={() => handleDeleteRoute(route.id, route.name)}
                         className="text-red-600 hover:text-red-900"
