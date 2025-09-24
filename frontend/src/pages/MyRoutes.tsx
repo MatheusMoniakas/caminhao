@@ -103,16 +103,29 @@ const MyRoutes: React.FC = () => {
 
   const handleStartRoute = async (routeId: string) => {
     try {
-      const response = await apiService.startRouteExecution({ routeId });
-      if (response.success) {
-        // Atualizar status para 'in_progress'
-        await apiService.updateRouteExecution(response.data.id, { 
+      // Verificar se já existe uma execução para esta rota
+      const existingExecution = executions.find(exec => exec.routeId === routeId);
+      
+      if (existingExecution) {
+        // Se já existe uma execução, apenas atualizar o status para 'in_progress'
+        await apiService.updateRouteExecution(existingExecution.id, { 
           status: 'in_progress' 
         });
         toast.success('Rota iniciada com sucesso!');
         loadMyRoutes(); // Recarregar dados
       } else {
-        toast.error(response.error || 'Erro ao iniciar rota');
+        // Se não existe execução, criar uma nova
+        const response = await apiService.startRouteExecution({ routeId });
+        if (response.success) {
+          // Atualizar status para 'in_progress'
+          await apiService.updateRouteExecution(response.data.id, { 
+            status: 'in_progress' 
+          });
+          toast.success('Rota iniciada com sucesso!');
+          loadMyRoutes(); // Recarregar dados
+        } else {
+          toast.error(response.error || 'Erro ao iniciar rota');
+        }
       }
     } catch (error: any) {
       console.error('Erro ao iniciar rota:', error);
@@ -195,14 +208,14 @@ const MyRoutes: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white shadow-xl">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 rounded-2xl p-8 text-white shadow-xl">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Minhas Rotas</h1>
-            <p className="mt-2 text-blue-100 text-lg">
+            <p className="mt-2 text-blue-100 dark:text-blue-200 text-lg">
               Gerencie suas rotas atribuídas
             </p>
-            <p className="mt-1 text-blue-200 text-sm">
+            <p className="mt-1 text-blue-200 dark:text-blue-300 text-sm">
               Visualize o status e execute suas entregas
             </p>
           </div>
@@ -216,7 +229,7 @@ const MyRoutes: React.FC = () => {
 
       {/* Route Status Summary */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
           <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -226,10 +239,10 @@ const MyRoutes: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-semibold text-gray-600 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400 truncate">
                     Pendentes
                   </dt>
-                  <dd className="text-2xl font-bold text-gray-900 mt-1">{stats.pending}</dd>
+                  <dd className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.pending}</dd>
                   <dd className="text-xs text-yellow-600 flex items-center mt-1">
                     <Clock className="h-3 w-3 mr-1" />
                     Aguardando início
@@ -240,7 +253,7 @@ const MyRoutes: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
           <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -250,10 +263,10 @@ const MyRoutes: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-semibold text-gray-600 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400 truncate">
                     Em Execução
                   </dt>
-                  <dd className="text-2xl font-bold text-gray-900 mt-1">{stats.inProgress}</dd>
+                  <dd className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.inProgress}</dd>
                   <dd className="text-xs text-blue-600 flex items-center mt-1">
                     <Play className="h-3 w-3 mr-1" />
                     Em andamento
@@ -264,7 +277,7 @@ const MyRoutes: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
           <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -274,10 +287,10 @@ const MyRoutes: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-semibold text-gray-600 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400 truncate">
                     Concluídas Hoje
                   </dt>
-                  <dd className="text-2xl font-bold text-gray-900 mt-1">{stats.completedToday}</dd>
+                  <dd className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.completedToday}</dd>
                   <dd className="text-xs text-green-600 flex items-center mt-1">
                     <CheckCircle className="h-3 w-3 mr-1" />
                     Finalizadas
@@ -308,7 +321,7 @@ const MyRoutes: React.FC = () => {
             const status = execution?.status || 'pending';
             
             return (
-              <div key={route.id} className="bg-white shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+              <div key={route.id} className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
                 <div className="px-6 py-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -386,29 +399,29 @@ const MyRoutes: React.FC = () => {
           <div className="flex min-h-screen items-center justify-center p-4">
             <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={() => setShowCancelModal(false)} />
             
-            <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full border border-gray-100">
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                <h3 className="text-xl font-bold text-gray-900 flex items-center">
+              <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-100 dark:border-gray-700">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
                   <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center mr-3">
                     <AlertTriangle className="h-5 w-5 text-red-600" />
                   </div>
                   Cancelar Rota
                 </h3>
-                <button
-                  onClick={() => setShowCancelModal(false)}
-                  className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-2 transition-colors"
-                >
+                  <button
+                    onClick={() => setShowCancelModal(false)}
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-2 transition-colors"
+                  >
                   <X className="h-6 w-6" />
                 </button>
               </div>
 
               <div className="p-6">
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
                   Tem certeza que deseja cancelar esta rota? Por favor, informe o motivo do cancelamento.
                 </p>
                 
                 <div className="mb-6">
-                  <label htmlFor="cancelReason" className="block text-sm font-semibold text-gray-700 mb-3">
+                  <label htmlFor="cancelReason" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                     Motivo do cancelamento *
                   </label>
                   <textarea
@@ -416,16 +429,16 @@ const MyRoutes: React.FC = () => {
                     value={cancelReason}
                     onChange={(e) => setCancelReason(e.target.value)}
                     rows={4}
-                    className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-4 focus:ring-red-500/20 focus:border-red-500 sm:text-sm transition-all duration-200"
+                    className="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-4 focus:ring-red-500/20 focus:border-red-500 sm:text-sm transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Ex: Caminhão quebrou, problema no destino, etc."
                   />
                 </div>
 
                 <div className="flex justify-end space-x-3">
-                  <button
-                    onClick={() => setShowCancelModal(false)}
-                    className="px-6 py-3 border border-gray-300 rounded-xl shadow-sm text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-500/20 transition-all duration-200"
-                  >
+                    <button
+                      onClick={() => setShowCancelModal(false)}
+                      className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-500/20 transition-all duration-200"
+                    >
                     Cancelar
                   </button>
                   <button

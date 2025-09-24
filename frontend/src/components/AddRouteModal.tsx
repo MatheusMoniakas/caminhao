@@ -125,14 +125,14 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={onClose} />
         
-        <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">
+        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
               Nova Rota
             </h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
             >
               <X className="h-6 w-6" />
             </button>
@@ -141,7 +141,7 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
             {/* Nome da Rota */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Nome da Rota *
               </label>
               <input
@@ -151,7 +151,7 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
                   required: 'Nome da rota é obrigatório',
                   minLength: { value: 2, message: 'Nome deve ter pelo menos 2 caracteres' }
                 })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 placeholder="Ex: Rota Centro - Zona Sul"
               />
               {errors.name && (
@@ -161,49 +161,49 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
 
             {/* Descrição */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Descrição
               </label>
               <textarea
                 id="description"
                 {...register('description')}
                 rows={3}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 placeholder="Descrição da rota (opcional)"
               />
             </div>
 
             {/* Ponto de Partida */}
             <div>
-              <label htmlFor="startPoint" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="startPoint" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Ponto de Partida
               </label>
               <input
                 type="text"
                 id="startPoint"
                 {...register('startPoint')}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 placeholder="Ex: Centro da Cidade (opcional)"
               />
             </div>
 
             {/* Ponto de Destino */}
             <div>
-              <label htmlFor="endPoint" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="endPoint" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Ponto de Destino
               </label>
               <input
                 type="text"
                 id="endPoint"
                 {...register('endPoint')}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 placeholder="Ex: Zona Sul (opcional)"
               />
             </div>
 
             {/* Pontos de Parada */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Pontos de Parada (opcional)
               </label>
               {waypoints.length === 0 ? (
@@ -217,7 +217,7 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
                       type="text"
                       value={waypoint}
                       onChange={(e) => updateWaypoint(index, e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                       placeholder={`Ponto de parada ${index + 1}`}
                     />
                     <button
@@ -233,7 +233,7 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
               <button
                 type="button"
                 onClick={addWaypoint}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Adicionar Ponto
@@ -242,7 +242,7 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
 
             {/* Motorista */}
             <div>
-              <label htmlFor="driverId" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="driverId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Motorista *
               </label>
               <select
@@ -250,7 +250,7 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
                 {...register('driverId', { 
                   required: 'Motorista é obrigatório'
                 })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
               >
                 <option value="">Selecione o motorista</option>
                 {employees.map((employee) => (
@@ -266,13 +266,13 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
 
             {/* Ajudante */}
             <div>
-              <label htmlFor="helperId" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="helperId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Ajudante
               </label>
               <select
                 id="helperId"
                 {...register('helperId')}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
               >
                 <option value="">Selecione um ajudante (opcional)</option>
                 {employees.map((employee) => (
@@ -288,7 +288,7 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 Cancelar
               </button>

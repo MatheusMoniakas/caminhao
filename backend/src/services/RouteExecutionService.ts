@@ -6,6 +6,17 @@ export class RouteExecutionService {
     routeId: string;
     employeeId: string;
   }): Promise<RouteExecution> {
+    // Verificar se já existe uma execução para esta rota e funcionário
+    const existingExecution = await this.getRouteExecutionByRouteAndEmployee(
+      executionData.routeId, 
+      executionData.employeeId
+    );
+
+    if (existingExecution) {
+      // Se já existe uma execução, retornar a existente
+      return existingExecution;
+    }
+
     const { data, error } = await supabaseAdmin
       .from('route_executions')
       .insert({
@@ -36,6 +47,27 @@ export class RouteExecutionService {
     if (error) {
       if (error.code === 'PGRST116') {
         return null; // Route execution not found
+      }
+      throw new Error(`Failed to get route execution: ${error.message}`);
+    }
+
+    return this.mapRouteExecutionFromDatabase(data);
+  }
+
+  async getRouteExecutionByRouteAndEmployee(routeId: string, employeeId: string): Promise<RouteExecution | null> {
+    const { data, error } = await supabaseAdmin
+      .from('route_executions')
+      .select('*')
+      .eq('route_id', routeId)
+      .eq('employee_id', employeeId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      // Se não encontrar nenhuma execução, retornar null (não é um erro)
+      if (error.code === 'PGRST116') {
+        return null;
       }
       throw new Error(`Failed to get route execution: ${error.message}`);
     }

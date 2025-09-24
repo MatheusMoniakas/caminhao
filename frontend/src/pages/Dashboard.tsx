@@ -34,7 +34,12 @@ const Dashboard: React.FC = () => {
       const executions = executionsResponse.success ? executionsResponse.data : [];
 
       // Calcular estatísticas
-      const activeRoutes = routes.filter((route: any) => route.isActive).length;
+      // Rotas ativas são aquelas que têm execuções pendentes ou em progresso
+      const activeRoutes = routes.filter((route: any) => {
+        const routeExecution = executions.find((exec: any) => exec.routeId === route.id);
+        return routeExecution && (routeExecution.status === 'pending' || routeExecution.status === 'in_progress');
+      }).length;
+      
       const routesInExecution = executions.filter((exec: any) => exec.status === 'in_progress').length;
       
       // Rotas concluídas hoje
@@ -69,16 +74,16 @@ const Dashboard: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white shadow-xl">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 rounded-2xl p-8 text-white shadow-xl">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">
               Olá, {user?.name}! 👋
             </h1>
-            <p className="mt-2 text-blue-100 text-lg">
+            <p className="mt-2 text-blue-100 dark:text-blue-200 text-lg">
               Bem-vindo ao FleetManager - Sistema de gestão de frotas
             </p>
-            <p className="mt-1 text-blue-200 text-sm">
+            <p className="mt-1 text-blue-200 dark:text-blue-300 text-sm">
               Acompanhe o desempenho da sua operação em tempo real
             </p>
           </div>
@@ -92,7 +97,7 @@ const Dashboard: React.FC = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
           <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -102,10 +107,10 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-semibold text-gray-600 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400 truncate">
                     Total de Funcionários
                   </dt>
-                  <dd className="text-2xl font-bold text-gray-900 mt-1">
+                  <dd className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                     {loading ? '...' : stats.totalEmployees}
                   </dd>
                   <dd className="text-xs text-green-600 flex items-center mt-1">
@@ -118,7 +123,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
           <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -128,10 +133,10 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-semibold text-gray-600 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400 truncate">
                     Rotas Ativas
                   </dt>
-                  <dd className="text-2xl font-bold text-gray-900 mt-1">
+                  <dd className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                     {loading ? '...' : stats.activeRoutes}
                   </dd>
                   <dd className="text-xs text-green-600 flex items-center mt-1">
@@ -144,7 +149,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
           <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -154,10 +159,10 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-semibold text-gray-600 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400 truncate">
                     Rotas em Execução
                   </dt>
-                  <dd className="text-2xl font-bold text-gray-900 mt-1">
+                  <dd className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                     {loading ? '...' : stats.routesInExecution}
                   </dd>
                   <dd className="text-xs text-amber-600 flex items-center mt-1">
@@ -170,7 +175,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
           <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -180,10 +185,10 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-semibold text-gray-600 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 dark:text-gray-400 truncate">
                     Rotas Concluídas Hoje
                   </dt>
-                  <dd className="text-2xl font-bold text-gray-900 mt-1">
+                  <dd className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                     {loading ? '...' : stats.completedRoutesToday}
                   </dd>
                   <dd className="text-xs text-purple-600 flex items-center mt-1">
@@ -198,9 +203,9 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white shadow-lg rounded-2xl border border-gray-100">
+        <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl border border-gray-100 dark:border-gray-700">
         <div className="px-8 py-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
             Ações Rápidas
           </h3>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -215,13 +220,13 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
                 <div className="ml-6 flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
                     Gerenciar Funcionários
                   </h3>
-                  <p className="mt-2 text-gray-600">
+                  <p className="mt-2 text-gray-600 dark:text-gray-400">
                     Adicionar, editar ou desativar funcionários
                   </p>
-                  <div className="mt-3 flex items-center text-sm text-blue-600 font-medium">
+                  <div className="mt-3 flex items-center text-sm text-blue-600 dark:text-blue-400 font-medium">
                     <span>Acessar</span>
                     <svg className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -245,7 +250,7 @@ const Dashboard: React.FC = () => {
                   <h3 className="text-xl font-bold text-gray-900 group-hover:text-green-700 transition-colors">
                     Gerenciar Rotas
                   </h3>
-                  <p className="mt-2 text-gray-600">
+                  <p className="mt-2 text-gray-600 dark:text-gray-400">
                     Criar e configurar novas rotas
                   </p>
                   <div className="mt-3 flex items-center text-sm text-green-600 font-medium">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import Layout from '@/components/Layout';
 import Loading from '@/components/Loading';
 
@@ -79,7 +80,8 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
 
 const App: React.FC = () => {
   return (
-    <Routes>
+    <ThemeProvider>
+      <Routes>
       {/* Public Routes */}
       <Route 
         path="/login" 
@@ -140,7 +142,8 @@ const App: React.FC = () => {
       
       {/* 404 - redirect based on role */}
       <Route path="*" element={<NavigateToRoleBasedRoute />} />
-    </Routes>
+      </Routes>
+    </ThemeProvider>
   );
 };
 
