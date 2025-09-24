@@ -160,8 +160,8 @@ const Employees: React.FC = () => {
     <div className="space-y-6">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">Funcionários</h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Funcionários</h1>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
             Gerencie os funcionários do sistema
           </p>
         </div>
@@ -232,16 +232,16 @@ const Employees: React.FC = () => {
       </div>
 
       {/* Employees Table */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
         <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
             Lista de Funcionários
           </h3>
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+          <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
             Todos os funcionários cadastrados no sistema
           </p>
         </div>
-        <div className="border-t border-gray-200">
+        <div className="border-t border-gray-200 dark:border-gray-700">
           {isLoading ? (
             <div className="text-center py-12">
               <div className="text-gray-500">Carregando funcionários...</div>
@@ -281,12 +281,12 @@ const Employees: React.FC = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredEmployees.map((employee) => (
-                    <tr key={employee.id} className={`hover:bg-gray-50 ${!employee.isActive ? 'bg-gray-50 opacity-75' : ''}`}>
+                    <tr key={employee.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${!employee.isActive ? 'bg-gray-50 dark:bg-gray-700 opacity-75' : ''}`}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
                             {employee.name}
                           </div>
                           {!employee.isActive && (
@@ -297,7 +297,7 @@ const Employees: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{employee.email}</div>
+                        <div className="text-sm text-gray-900 dark:text-white">{employee.email}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">

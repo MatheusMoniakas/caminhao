@@ -69,9 +69,19 @@ const MyRoutes: React.FC = () => {
   };
 
   const getStatusStats = () => {
-    const pending = executions.filter(exec => exec.status === 'pending').length;
-    const inProgress = executions.filter(exec => exec.status === 'in_progress').length;
-    const completedToday = executions.filter(exec => {
+    // Agrupar execuções por rota e pegar apenas a mais recente de cada rota
+    const uniqueExecutions = executions.reduce((acc, exec) => {
+      if (!acc[exec.routeId] || new Date(exec.createdAt) > new Date(acc[exec.routeId].createdAt)) {
+        acc[exec.routeId] = exec;
+      }
+      return acc;
+    }, {} as Record<string, any>);
+
+    const uniqueExecutionsArray = Object.values(uniqueExecutions);
+
+    const pending = uniqueExecutionsArray.filter(exec => exec.status === 'pending').length;
+    const inProgress = uniqueExecutionsArray.filter(exec => exec.status === 'in_progress').length;
+    const completedToday = uniqueExecutionsArray.filter(exec => {
       if (exec.status !== 'completed' || !exec.endTime) return false;
       const today = new Date().toISOString().split('T')[0];
       return exec.endTime.startsWith(today);
@@ -317,7 +327,13 @@ const MyRoutes: React.FC = () => {
           </div>
         ) : (
           routes.map((route) => {
-            const execution = executions.find(exec => exec.routeId === route.id);
+            // Pegar a execução mais recente para esta rota
+            const routeExecutions = executions.filter(exec => exec.routeId === route.id);
+            const execution = routeExecutions.length > 0 
+              ? routeExecutions.reduce((latest, current) => 
+                  new Date(current.createdAt) > new Date(latest.createdAt) ? current : latest
+                )
+              : null;
             const status = execution?.status || 'pending';
             
             return (
@@ -331,10 +347,10 @@ const MyRoutes: React.FC = () => {
                         </div>
                       </div>
                       <div className="ml-4">
-                        <h3 className="text-xl font-bold text-gray-900">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                           {route.name}
                         </h3>
-                        <p className="text-gray-600 mt-1">
+                        <p className="text-gray-600 dark:text-gray-400 mt-1">
                           {route.startPoint && route.endPoint 
                             ? `${route.startPoint} → ${route.endPoint}`
                             : route.description || 'Rota sem pontos definidos'

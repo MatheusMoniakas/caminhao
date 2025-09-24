@@ -137,8 +137,8 @@ const Routes: React.FC = () => {
     <div className="space-y-6">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">Rotas</h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Rotas</h1>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
             Gerencie as rotas de entrega
           </p>
         </div>
@@ -205,19 +205,19 @@ const Routes: React.FC = () => {
       </div>
 
       {/* Routes Table */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
         {loading ? (
           <div className="p-8 text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-            <p className="mt-2 text-sm text-gray-500">Carregando rotas...</p>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Carregando rotas...</p>
           </div>
         ) : filteredRoutes.length === 0 ? (
           <div className="p-12 text-center">
             <MapPin className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
               {routes.length === 0 ? 'Nenhuma rota' : 'Nenhuma rota encontrada'}
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {routes.length === 0 
                 ? 'Comece criando uma nova rota de entrega.'
                 : 'Tente ajustar os filtros de busca.'
@@ -248,14 +248,14 @@ const Routes: React.FC = () => {
                       </div>
                       <div className="ml-4">
                         <div className="flex items-center">
-                          <h3 className="text-lg font-medium text-gray-900">
+                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                             {route.name}
                           </h3>
                           <div className="ml-3">
                             {getStatusBadge(getRouteExecutionStatus(route.id))}
                           </div>
                         </div>
-                        <div className="mt-1 text-sm text-gray-500">
+                        <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                           {route.startPoint && <p><strong>De:</strong> {route.startPoint}</p>}
                           {route.endPoint && <p><strong>Para:</strong> {route.endPoint}</p>}
                           {route.description && (
