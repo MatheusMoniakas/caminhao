@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, CheckCircle, Clock, MapPin, User } from 'lucide-react';
+import { Play, CheckCircle, Clock, MapPin } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import apiService from '@/services/api';
 import toast from 'react-hot-toast';
