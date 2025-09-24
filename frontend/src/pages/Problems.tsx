@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Clock, User, MapPin, Filter, Search, Eye } from 'lucide-react';
+import { AlertTriangle, Clock, User, Filter, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiService from '@/services/api';
 
