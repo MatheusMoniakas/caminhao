@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, CheckCircle, Clock, MapPin } from 'lucide-react';
+import { Play, CheckCircle, Clock, MapPin, X, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import apiService from '@/services/api';
 import toast from 'react-hot-toast';
@@ -35,6 +35,9 @@ const MyRoutes: React.FC = () => {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [executions, setExecutions] = useState<RouteExecution[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedExecution, setSelectedExecution] = useState<RouteExecution | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
 
   useEffect(() => {
     if (user?.id) {
@@ -102,6 +105,10 @@ const MyRoutes: React.FC = () => {
     try {
       const response = await apiService.startRouteExecution({ routeId });
       if (response.success) {
+        // Atualizar status para 'in_progress'
+        await apiService.updateRouteExecution(response.data.id, { 
+          status: 'in_progress' 
+        });
         toast.success('Rota iniciada com sucesso!');
         loadMyRoutes(); // Recarregar dados
       } else {
@@ -130,6 +137,38 @@ const MyRoutes: React.FC = () => {
     }
   };
 
+  const handleCancelRoute = (execution: RouteExecution) => {
+    setSelectedExecution(execution);
+    setCancelReason('');
+    setShowCancelModal(true);
+  };
+
+  const confirmCancelRoute = async () => {
+    if (!selectedExecution || !cancelReason.trim()) {
+      toast.error('Por favor, informe o motivo do cancelamento');
+      return;
+    }
+
+    try {
+      const response = await apiService.updateRouteExecution(selectedExecution.id, { 
+        status: 'cancelled',
+        observations: cancelReason.trim()
+      });
+      if (response.success) {
+        toast.success('Rota cancelada com sucesso!');
+        setShowCancelModal(false);
+        setSelectedExecution(null);
+        setCancelReason('');
+        loadMyRoutes(); // Recarregar dados
+      } else {
+        toast.error(response.error || 'Erro ao cancelar rota');
+      }
+    } catch (error: any) {
+      console.error('Erro ao cancelar rota:', error);
+      toast.error('Erro ao cancelar rota');
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -154,64 +193,95 @@ const MyRoutes: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Minhas Rotas</h1>
-        <p className="mt-2 text-sm text-gray-700">
-          Visualize e execute suas rotas atribuídas
-        </p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Minhas Rotas</h1>
+            <p className="mt-2 text-blue-100 text-lg">
+              Gerencie suas rotas atribuídas
+            </p>
+            <p className="mt-1 text-blue-200 text-sm">
+              Visualize o status e execute suas entregas
+            </p>
+          </div>
+          <div className="hidden md:block">
+            <div className="w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <MapPin className="h-12 w-12 text-white" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Route Status Summary */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+          <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <Clock className="h-6 w-6 text-yellow-500" />
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-yellow-400 to-yellow-500 shadow-lg">
+                  <Clock className="h-7 w-7 text-white" />
+                </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 truncate">
                     Pendentes
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.pending}</dd>
+                  <dd className="text-2xl font-bold text-gray-900 mt-1">{stats.pending}</dd>
+                  <dd className="text-xs text-yellow-600 flex items-center mt-1">
+                    <Clock className="h-3 w-3 mr-1" />
+                    Aguardando início
+                  </dd>
                 </dl>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
+        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+          <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <Play className="h-6 w-6 text-blue-500" />
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg">
+                  <Play className="h-7 w-7 text-white" />
+                </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 truncate">
                     Em Execução
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.inProgress}</dd>
+                  <dd className="text-2xl font-bold text-gray-900 mt-1">{stats.inProgress}</dd>
+                  <dd className="text-xs text-blue-600 flex items-center mt-1">
+                    <Play className="h-3 w-3 mr-1" />
+                    Em andamento
+                  </dd>
                 </dl>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
+        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+          <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <CheckCircle className="h-6 w-6 text-green-500" />
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 shadow-lg">
+                  <CheckCircle className="h-7 w-7 text-white" />
+                </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 truncate">
                     Concluídas Hoje
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.completedToday}</dd>
+                  <dd className="text-2xl font-bold text-gray-900 mt-1">{stats.completedToday}</dd>
+                  <dd className="text-xs text-green-600 flex items-center mt-1">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Finalizadas
+                  </dd>
                 </dl>
               </div>
             </div>
@@ -238,18 +308,20 @@ const MyRoutes: React.FC = () => {
             const status = execution?.status || 'pending';
             
             return (
-              <div key={route.id} className="bg-white shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-6">
+              <div key={route.id} className="bg-white shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+                <div className="px-6 py-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <div className="flex-shrink-0">
-                        <MapPin className="h-8 w-8 text-primary-600" />
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                          <MapPin className="h-6 w-6 text-white" />
+                        </div>
                       </div>
                       <div className="ml-4">
-                        <h3 className="text-lg font-medium text-gray-900">
+                        <h3 className="text-xl font-bold text-gray-900">
                           {route.name}
                         </h3>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-gray-600 mt-1">
                           {route.startPoint && route.endPoint 
                             ? `${route.startPoint} → ${route.endPoint}`
                             : route.description || 'Rota sem pontos definidos'
@@ -262,20 +334,29 @@ const MyRoutes: React.FC = () => {
                       {status === 'pending' && (
                         <button 
                           onClick={() => handleStartRoute(route.id)}
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                          className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-500/20 shadow-lg hover:shadow-xl transition-all duration-300"
                         >
-                          <Play className="h-4 w-4 mr-1" />
-                          Iniciar
+                          <Play className="h-5 w-5 mr-2" />
+                          Iniciar Rota
                         </button>
                       )}
                       {status === 'in_progress' && (
-                        <button 
-                          onClick={() => handleCompleteRoute(execution!.id)}
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          Concluir
-                        </button>
+                        <div className="flex space-x-3">
+                          <button 
+                            onClick={() => handleCompleteRoute(execution!.id)}
+                            className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-500/20 shadow-lg hover:shadow-xl transition-all duration-300"
+                          >
+                            <CheckCircle className="h-5 w-5 mr-2" />
+                            Finalizar
+                          </button>
+                          <button 
+                            onClick={() => handleCancelRoute(execution!)}
+                            className="inline-flex items-center px-6 py-3 border border-red-300 text-sm font-semibold rounded-xl text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-500/20 shadow-lg hover:shadow-xl transition-all duration-300"
+                          >
+                            <X className="h-5 w-5 mr-2" />
+                            Cancelar
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -298,6 +379,67 @@ const MyRoutes: React.FC = () => {
           })
         )}
       </div>
+
+      {/* Modal de Cancelamento */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={() => setShowCancelModal(false)} />
+            
+            <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full border border-gray-100">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                  <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center mr-3">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                  </div>
+                  Cancelar Rota
+                </h3>
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-2 transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <p className="text-gray-600 mb-6">
+                  Tem certeza que deseja cancelar esta rota? Por favor, informe o motivo do cancelamento.
+                </p>
+                
+                <div className="mb-6">
+                  <label htmlFor="cancelReason" className="block text-sm font-semibold text-gray-700 mb-3">
+                    Motivo do cancelamento *
+                  </label>
+                  <textarea
+                    id="cancelReason"
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    rows={4}
+                    className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-4 focus:ring-red-500/20 focus:border-red-500 sm:text-sm transition-all duration-200"
+                    placeholder="Ex: Caminhão quebrou, problema no destino, etc."
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => setShowCancelModal(false)}
+                    className="px-6 py-3 border border-gray-300 rounded-xl shadow-sm text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-500/20 transition-all duration-200"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={confirmCancelRoute}
+                    className="px-6 py-3 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-4 focus:ring-red-500/20 transition-all duration-200"
+                  >
+                    Confirmar Cancelamento
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

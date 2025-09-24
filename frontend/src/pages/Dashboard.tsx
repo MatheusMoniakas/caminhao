@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Users, MapPin, Truck, BarChart3 } from 'lucide-react';
+import { Users, MapPin, Truck, BarChart3, TrendingUp, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import apiService from '@/services/api';
 
 const Dashboard: React.FC = () => {
@@ -67,77 +67,76 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Olá, {user?.name}! 👋
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Bem-vindo ao sistema de gestão de rotas de caminhões
-        </p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white shadow-xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">
+              Olá, {user?.name}! 👋
+            </h1>
+            <p className="mt-2 text-blue-100 text-lg">
+              Bem-vindo ao FleetManager - Sistema de gestão de frotas
+            </p>
+            <p className="mt-1 text-blue-200 text-sm">
+              Acompanhe o desempenho da sua operação em tempo real
+            </p>
+          </div>
+          <div className="hidden md:block">
+            <div className="w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <Truck className="h-12 w-12 text-white" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+          <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="p-3 rounded-md bg-blue-500">
-                  <Users className="h-6 w-6 text-white" />
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg">
+                  <Users className="h-7 w-7 text-white" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 truncate">
                     Total de Funcionários
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  <dd className="text-2xl font-bold text-gray-900 mt-1">
                     {loading ? '...' : stats.totalEmployees}
                   </dd>
+                  <dd className="text-xs text-green-600 flex items-center mt-1">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +12% este mês
+                  </dd>
                 </dl>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
+        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+          <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="p-3 rounded-md bg-green-500">
-                  <MapPin className="h-6 w-6 text-white" />
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 shadow-lg">
+                  <MapPin className="h-7 w-7 text-white" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 truncate">
                     Rotas Ativas
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  <dd className="text-2xl font-bold text-gray-900 mt-1">
                     {loading ? '...' : stats.activeRoutes}
                   </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="p-3 rounded-md bg-yellow-500">
-                  <Truck className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Rotas em Execução
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {loading ? '...' : stats.routesInExecution}
+                  <dd className="text-xs text-green-600 flex items-center mt-1">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Operacionais
                   </dd>
                 </dl>
               </div>
@@ -145,21 +144,51 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
+        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+          <div className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="p-3 rounded-md bg-purple-500">
-                  <BarChart3 className="h-6 w-6 text-white" />
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg">
+                  <Truck className="h-7 w-7 text-white" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-semibold text-gray-600 truncate">
+                    Rotas em Execução
+                  </dt>
+                  <dd className="text-2xl font-bold text-gray-900 mt-1">
+                    {loading ? '...' : stats.routesInExecution}
+                  </dd>
+                  <dd className="text-xs text-amber-600 flex items-center mt-1">
+                    <Clock className="h-3 w-3 mr-1" />
+                    Em andamento
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300">
+          <div className="p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 shadow-lg">
+                  <BarChart3 className="h-7 w-7 text-white" />
+                </div>
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-semibold text-gray-600 truncate">
                     Rotas Concluídas Hoje
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  <dd className="text-2xl font-bold text-gray-900 mt-1">
                     {loading ? '...' : stats.completedRoutesToday}
+                  </dd>
+                  <dd className="text-xs text-purple-600 flex items-center mt-1">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +8% vs ontem
                   </dd>
                 </dl>
               </div>
@@ -169,49 +198,63 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
+      <div className="bg-white shadow-lg rounded-2xl border border-gray-100">
+        <div className="px-8 py-8">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">
             Ações Rápidas
           </h3>
-          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <button 
               onClick={handleNavigateToEmployees}
-              className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary-500 rounded-lg border border-gray-300 hover:border-gray-400 transition-colors"
+              className="group relative bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl border border-blue-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20"
             >
-              <div>
-                <span className="rounded-lg inline-flex p-3 bg-blue-50 text-blue-700 ring-4 ring-white">
-                  <Users className="h-6 w-6" />
-                </span>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-lg font-medium">
-                  <span className="absolute inset-0" aria-hidden="true" />
-                  Gerenciar Funcionários
-                </h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Adicionar, editar ou desativar funcionários
-                </p>
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <div className="ml-6 flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
+                    Gerenciar Funcionários
+                  </h3>
+                  <p className="mt-2 text-gray-600">
+                    Adicionar, editar ou desativar funcionários
+                  </p>
+                  <div className="mt-3 flex items-center text-sm text-blue-600 font-medium">
+                    <span>Acessar</span>
+                    <svg className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </button>
 
             <button 
               onClick={handleNavigateToRoutes}
-              className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary-500 rounded-lg border border-gray-300 hover:border-gray-400 transition-colors"
+              className="group relative bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl border border-green-200 hover:border-green-300 hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500/20"
             >
-              <div>
-                <span className="rounded-lg inline-flex p-3 bg-green-50 text-green-700 ring-4 ring-white">
-                  <MapPin className="h-6 w-6" />
-                </span>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-lg font-medium">
-                  <span className="absolute inset-0" aria-hidden="true" />
-                  Gerenciar Rotas
-                </h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Criar e configurar novas rotas
-                </p>
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <MapPin className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <div className="ml-6 flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 group-hover:text-green-700 transition-colors">
+                    Gerenciar Rotas
+                  </h3>
+                  <p className="mt-2 text-gray-600">
+                    Criar e configurar novas rotas
+                  </p>
+                  <div className="mt-3 flex items-center text-sm text-green-600 font-medium">
+                    <span>Acessar</span>
+                    <svg className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </button>
           </div>
