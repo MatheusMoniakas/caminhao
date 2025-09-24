@@ -43,6 +43,7 @@ export interface RouteExecution {
   startTime?: string;
   endTime?: string;
   observations?: string;
+  problemResolved?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -110,6 +111,7 @@ export interface StartRouteExecutionRequest {
 export interface UpdateRouteExecutionRequest {
   status?: 'in_progress' | 'completed' | 'cancelled';
   observations?: string;
+  problemResolved?: boolean;
 }
 
 export interface ApiResponse<T = any> {

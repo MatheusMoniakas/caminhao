@@ -134,6 +134,7 @@ export class RouteExecutionService {
     }
     
     if (updates.observations !== undefined) updateData.observations = updates.observations;
+    if (updates.problemResolved !== undefined) updateData.problem_resolved = updates.problemResolved;
 
     const { data, error } = await supabaseAdmin
       .from('route_executions')
@@ -184,6 +185,7 @@ export class RouteExecutionService {
       startTime: data.start_time,
       endTime: data.end_time,
       observations: data.observations,
+      problemResolved: data.problem_resolved,
       createdAt: data.created_at,
       updatedAt: data.updated_at
     };

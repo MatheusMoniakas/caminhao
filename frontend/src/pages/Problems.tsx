@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Clock, User, Filter, Search } from 'lucide-react';
+import { AlertTriangle, Clock, User, Filter, Search, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiService from '@/services/api';
 
@@ -11,6 +11,7 @@ interface RouteExecution {
   startTime?: string;
   endTime?: string;
   observations?: string;
+  problemResolved?: boolean;
   createdAt: string;
   updatedAt: string;
   route?: {
@@ -55,6 +56,24 @@ const Problems: React.FC = () => {
       toast.error('Erro ao carregar problemas reportados');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResolveProblem = async (executionId: string) => {
+    try {
+      const response = await apiService.updateRouteExecution(executionId, {
+        problemResolved: true
+      });
+      
+      if (response.success) {
+        toast.success('Problema marcado como resolvido!');
+        loadProblems(); // Recarregar a lista
+      } else {
+        toast.error(response.error || 'Erro ao marcar problema como resolvido');
+      }
+    } catch (error: any) {
+      console.error('Erro ao resolver problema:', error);
+      toast.error('Erro ao marcar problema como resolvido');
     }
   };
 
@@ -103,8 +122,11 @@ const Problems: React.FC = () => {
       problem.observations?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === '' || problem.status === statusFilter;
+    
+    // Por padrão, mostrar apenas problemas não resolvidos
+    const isNotResolved = !problem.problemResolved;
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && isNotResolved;
   });
 
   return (
@@ -264,6 +286,17 @@ const Problems: React.FC = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* Action Button */}
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => handleResolveProblem(problem.id)}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm hover:shadow-md transition-all duration-200"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Problema Resolvido
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

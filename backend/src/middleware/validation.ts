@@ -77,5 +77,6 @@ export const startRouteExecutionSchema = Joi.object({
 
 export const updateRouteExecutionSchema = Joi.object({
   status: Joi.string().valid('in_progress', 'completed', 'cancelled').optional(),
-  observations: Joi.string().max(1000).optional()
+  observations: Joi.string().max(1000).optional(),
+  problemResolved: Joi.boolean().optional()
 });
