@@ -10,8 +10,7 @@ import {
   Menu,
   X,
   Bell,
-  Settings,
-  User
+  Settings
 } from 'lucide-react';
 
 interface LayoutProps {
