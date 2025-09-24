@@ -134,7 +134,11 @@ export class RouteExecutionService {
     }
     
     if (updates.observations !== undefined) updateData.observations = updates.observations;
-    if (updates.problemResolved !== undefined) updateData.problem_resolved = updates.problemResolved;
+    
+    // Tentar adicionar problem_resolved apenas se for fornecido
+    if (updates.problemResolved !== undefined) {
+      updateData.problem_resolved = updates.problemResolved;
+    }
 
     const { data, error } = await supabaseAdmin
       .from('route_executions')
@@ -144,7 +148,8 @@ export class RouteExecutionService {
       .single();
 
     if (error) {
-      throw new Error(`Failed to update route execution: ${error.message}`);
+      console.error('Supabase error details:', error);
+      throw new Error(`Failed to update route execution: ${error.message} (Code: ${error.code})`);
     }
 
     return this.mapRouteExecutionFromDatabase(data);
