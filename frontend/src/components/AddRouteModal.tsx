@@ -4,10 +4,35 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import apiService from '@/services/api';
 
+interface Route {
+  id: string;
+  name: string;
+  description?: string;
+  startPoint?: string;
+  endPoint?: string;
+  waypoints: string[];
+  driverId: string;
+  helperId?: string;
+  driver?: {
+    id: string;
+    name: string;
+  };
+  helper?: {
+    id: string;
+    name: string;
+  };
+  scheduledDate?: string;
+  shift?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface AddRouteModalProps {
   isOpen: boolean;
   onClose: () => void;
   onRouteCreated: () => void;
+  duplicateRouteData?: Route | null;
 }
 
 interface RouteFormData {
@@ -18,6 +43,8 @@ interface RouteFormData {
   waypoints: string[];
   driverId: string;
   helperId: string;
+  scheduledDate: string;
+  shift: string;
 }
 
 interface Employee {
@@ -31,7 +58,8 @@ interface Employee {
 const AddRouteModal: React.FC<AddRouteModalProps> = ({
   isOpen,
   onClose,
-  onRouteCreated
+  onRouteCreated,
+  duplicateRouteData
 }) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
@@ -48,8 +76,35 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       loadEmployees();
+      
+      // Se for uma duplicação, preencher os dados
+      if (duplicateRouteData) {
+        setValue('name', `${duplicateRouteData.name} (Cópia)`);
+        setValue('description', duplicateRouteData.description || '');
+        setValue('startPoint', duplicateRouteData.startPoint || '');
+        setValue('endPoint', duplicateRouteData.endPoint || '');
+        setValue('driverId', duplicateRouteData.driverId);
+        setValue('helperId', duplicateRouteData.helperId || '');
+        setValue('scheduledDate', duplicateRouteData.scheduledDate || '');
+        setValue('shift', duplicateRouteData.shift || '');
+        
+        // Preencher waypoints
+        if (duplicateRouteData.waypoints && duplicateRouteData.waypoints.length > 0) {
+          setWaypoints([...duplicateRouteData.waypoints]);
+        } else {
+          setWaypoints([]);
+        }
+      } else {
+        // Limpar dados se não for duplicação
+        reset();
+        setWaypoints([]);
+        
+        // Definir data padrão como hoje
+        const today = new Date().toISOString().split('T')[0];
+        setValue('scheduledDate', today);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, duplicateRouteData, setValue, reset]);
 
   const loadEmployees = async () => {
     try {
@@ -93,7 +148,9 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
         endPoint: data.endPoint || undefined,
         waypoints: filteredWaypoints.length > 0 ? filteredWaypoints : undefined,
         driverId: data.driverId,
-        helperId: data.helperId || undefined
+        helperId: data.helperId || undefined,
+        scheduledDate: data.scheduledDate,
+        shift: data.shift
       };
 
       console.log('Dados da rota sendo enviados:', routeData);
@@ -101,17 +158,17 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
       const response = await apiService.createRoute(routeData);
       
       if (response.success) {
-        toast.success('Rota criada com sucesso!');
+        toast.success(duplicateRouteData ? 'Rota duplicada com sucesso!' : 'Rota criada com sucesso!');
         reset();
         setWaypoints([]);
         onRouteCreated();
         onClose();
       } else {
-        toast.error(response.error || 'Erro ao criar rota');
+        toast.error(response.error || (duplicateRouteData ? 'Erro ao duplicar rota' : 'Erro ao criar rota'));
       }
     } catch (error: any) {
-      console.error('Erro ao criar rota:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Erro ao criar rota';
+      console.error(duplicateRouteData ? 'Erro ao duplicar rota:' : 'Erro ao criar rota:', error);
+      const errorMessage = error.response?.data?.error || error.message || (duplicateRouteData ? 'Erro ao duplicar rota' : 'Erro ao criar rota');
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -128,7 +185,7 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
         <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              Nova Rota
+              {duplicateRouteData ? 'Duplicar Rota' : 'Nova Rota'}
             </h3>
             <button
               onClick={onClose}
@@ -157,6 +214,50 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
               {errors.name && (
                 <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
               )}
+            </div>
+
+            {/* Data e Turno */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {/* Data Agendada */}
+              <div>
+                <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Data Agendada *
+                </label>
+                <input
+                  type="date"
+                  id="scheduledDate"
+                  {...register('scheduledDate', { 
+                    required: 'Data agendada é obrigatória'
+                  })}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+                {errors.scheduledDate && (
+                  <p className="mt-1 text-sm text-red-600">{errors.scheduledDate.message}</p>
+                )}
+              </div>
+
+              {/* Turno */}
+              <div>
+                <label htmlFor="shift" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Turno *
+                </label>
+                <select
+                  id="shift"
+                  {...register('shift', { 
+                    required: 'Turno é obrigatório'
+                  })}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="">Selecione o turno</option>
+                  <option value="manha">Manhã (06:00 - 12:00)</option>
+                  <option value="tarde">Tarde (12:00 - 18:00)</option>
+                  <option value="noite">Noite (18:00 - 00:00)</option>
+                  <option value="madrugada">Madrugada (00:00 - 06:00)</option>
+                </select>
+                {errors.shift && (
+                  <p className="mt-1 text-sm text-red-600">{errors.shift.message}</p>
+                )}
+              </div>
             </div>
 
             {/* Descrição */}
@@ -297,7 +398,7 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
                 disabled={loading}
                 className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Criando...' : 'Criar Rota'}
+                {loading ? (duplicateRouteData ? 'Duplicando...' : 'Criando...') : (duplicateRouteData ? 'Duplicar Rota' : 'Criar Rota')}
               </button>
             </div>
           </form>

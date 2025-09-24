@@ -13,6 +13,8 @@ interface Route {
   waypoints: string[];
   driverId: string;
   helperId?: string;
+  scheduledDate?: string;
+  shift?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -35,15 +37,25 @@ const MyRoutes: React.FC = () => {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [executions, setExecutions] = useState<RouteExecution[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showProblemModal, setShowProblemModal] = useState(false);
   const [selectedExecution, setSelectedExecution] = useState<RouteExecution | null>(null);
-  const [cancelReason, setCancelReason] = useState('');
+  const [problemDescription, setProblemDescription] = useState('');
 
   useEffect(() => {
     if (user?.id) {
       loadMyRoutes();
     }
   }, [user?.id]);
+
+  // Atualizar a lista a cada minuto para remover rotas concluídas há mais de 30 minutos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Forçar re-render para atualizar a lista filtrada
+      setRoutes(prevRoutes => [...prevRoutes]);
+    }, 60000); // 60 segundos
+
+    return () => clearInterval(interval);
+  }, []);
 
   const loadMyRoutes = async () => {
     try {
@@ -83,6 +95,18 @@ const MyRoutes: React.FC = () => {
     const inProgress = uniqueExecutionsArray.filter(exec => exec.status === 'in_progress').length;
     const completedToday = uniqueExecutionsArray.filter(exec => {
       if (exec.status !== 'completed' || !exec.endTime) return false;
+      
+      // Verificar se a rota foi concluída há menos de 30 minutos
+      const endTime = new Date(exec.endTime);
+      const now = new Date();
+      const timeDifference = now.getTime() - endTime.getTime();
+      const thirtyMinutes = 30 * 60 * 1000; // 30 minutos em milissegundos
+      
+      // Se passou mais de 30 minutos, não contar
+      if (timeDifference > thirtyMinutes) {
+        return false;
+      }
+      
       const today = new Date().toISOString().split('T')[0];
       return exec.endTime.startsWith(today);
     }).length;
@@ -107,6 +131,25 @@ const MyRoutes: React.FC = () => {
         {config.text}
       </span>
     );
+  };
+
+  const formatShift = (shift: string) => {
+    const shiftConfig = {
+      manha: 'Manhã (06:00 - 12:00)',
+      tarde: 'Tarde (12:00 - 18:00)',
+      noite: 'Noite (18:00 - 00:00)',
+      madrugada: 'Madrugada (00:00 - 06:00)'
+    };
+    return shiftConfig[shift as keyof typeof shiftConfig] || shift;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   };
 
   const stats = getStatusStats();
@@ -160,35 +203,34 @@ const MyRoutes: React.FC = () => {
     }
   };
 
-  const handleCancelRoute = (execution: RouteExecution) => {
+  const handleReportProblem = (execution: RouteExecution) => {
     setSelectedExecution(execution);
-    setCancelReason('');
-    setShowCancelModal(true);
+    setProblemDescription('');
+    setShowProblemModal(true);
   };
 
-  const confirmCancelRoute = async () => {
-    if (!selectedExecution || !cancelReason.trim()) {
-      toast.error('Por favor, informe o motivo do cancelamento');
+  const confirmReportProblem = async () => {
+    if (!selectedExecution || !problemDescription.trim()) {
+      toast.error('Por favor, descreva o problema encontrado');
       return;
     }
 
     try {
       const response = await apiService.updateRouteExecution(selectedExecution.id, { 
-        status: 'cancelled',
-        observations: cancelReason.trim()
+        observations: problemDescription.trim()
       });
       if (response.success) {
-        toast.success('Rota cancelada com sucesso!');
-        setShowCancelModal(false);
+        toast.success('Problema reportado com sucesso!');
+        setShowProblemModal(false);
         setSelectedExecution(null);
-        setCancelReason('');
+        setProblemDescription('');
         loadMyRoutes(); // Recarregar dados
       } else {
-        toast.error(response.error || 'Erro ao cancelar rota');
+        toast.error(response.error || 'Erro ao reportar problema');
       }
     } catch (error: any) {
-      console.error('Erro ao cancelar rota:', error);
-      toast.error('Erro ao cancelar rota');
+      console.error('Erro ao reportar problema:', error);
+      toast.error('Erro ao reportar problema');
     }
   };
 
@@ -326,7 +368,31 @@ const MyRoutes: React.FC = () => {
             </div>
           </div>
         ) : (
-          routes.map((route) => {
+          routes.filter((route) => {
+            // Pegar a execução mais recente para esta rota
+            const routeExecutions = executions.filter(exec => exec.routeId === route.id);
+            const execution = routeExecutions.length > 0 
+              ? routeExecutions.reduce((latest, current) => 
+                  new Date(current.createdAt) > new Date(latest.createdAt) ? current : latest
+                )
+              : null;
+            const status = execution?.status || 'pending';
+            
+            // Se a rota foi concluída, verificar se passou mais de 30 minutos
+            if (status === 'completed' && execution?.endTime) {
+              const endTime = new Date(execution.endTime);
+              const now = new Date();
+              const timeDifference = now.getTime() - endTime.getTime();
+              const thirtyMinutes = 30 * 60 * 1000; // 30 minutos em milissegundos
+              
+              // Se passou mais de 30 minutos, não exibir a rota
+              if (timeDifference > thirtyMinutes) {
+                return false;
+              }
+            }
+            
+            return true;
+          }).map((route) => {
             // Pegar a execução mais recente para esta rota
             const routeExecutions = executions.filter(exec => exec.routeId === route.id);
             const execution = routeExecutions.length > 0 
@@ -356,6 +422,20 @@ const MyRoutes: React.FC = () => {
                             : route.description || 'Rota sem pontos definidos'
                           }
                         </p>
+                        {(route.scheduledDate || route.shift) && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {route.scheduledDate && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                                📅 {formatDate(route.scheduledDate)}
+                              </span>
+                            )}
+                            {route.shift && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800">
+                                🕐 {formatShift(route.shift)}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -379,11 +459,11 @@ const MyRoutes: React.FC = () => {
                             Finalizar
                           </button>
                           <button 
-                            onClick={() => handleCancelRoute(execution!)}
-                            className="inline-flex items-center px-6 py-3 border border-red-300 text-sm font-semibold rounded-xl text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-500/20 shadow-lg hover:shadow-xl transition-all duration-300"
+                            onClick={() => handleReportProblem(execution!)}
+                            className="inline-flex items-center px-6 py-3 border border-orange-300 text-sm font-semibold rounded-xl text-orange-700 bg-white hover:bg-orange-50 focus:outline-none focus:ring-4 focus:ring-orange-500/20 shadow-lg hover:shadow-xl transition-all duration-300"
                           >
-                            <X className="h-5 w-5 mr-2" />
-                            Cancelar
+                            <AlertTriangle className="h-5 w-5 mr-2" />
+                            Reportar Problema
                           </button>
                         </div>
                       )}
@@ -409,22 +489,22 @@ const MyRoutes: React.FC = () => {
         )}
       </div>
 
-      {/* Modal de Cancelamento */}
-      {showCancelModal && (
+      {/* Modal de Reportar Problema */}
+      {showProblemModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-screen items-center justify-center p-4">
-            <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={() => setShowCancelModal(false)} />
+            <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={() => setShowProblemModal(false)} />
             
               <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
-                  <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center mr-3">
-                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                  <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center mr-3">
+                    <AlertTriangle className="h-5 w-5 text-orange-600" />
                   </div>
-                  Cancelar Rota
+                  Reportar Problema
                 </h3>
                   <button
-                    onClick={() => setShowCancelModal(false)}
+                    onClick={() => setShowProblemModal(false)}
                     className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-2 transition-colors"
                   >
                   <X className="h-6 w-6" />
@@ -433,35 +513,35 @@ const MyRoutes: React.FC = () => {
 
               <div className="p-6">
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Tem certeza que deseja cancelar esta rota? Por favor, informe o motivo do cancelamento.
+                  Reporte qualquer problema que esteja ocorrendo durante a execução desta rota. Esta informação será enviada para análise.
                 </p>
                 
                 <div className="mb-6">
                   <label htmlFor="cancelReason" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                    Motivo do cancelamento *
+                    Descrição do problema *
                   </label>
-                  <textarea
-                    id="cancelReason"
-                    value={cancelReason}
-                    onChange={(e) => setCancelReason(e.target.value)}
+                    <textarea
+                    id="problemDescription"
+                    value={problemDescription}
+                    onChange={(e) => setProblemDescription(e.target.value)}
                     rows={4}
                     className="mt-1 block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-4 focus:ring-red-500/20 focus:border-red-500 sm:text-sm transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    placeholder="Ex: Caminhão quebrou, problema no destino, etc."
+                    placeholder="Ex: Caminhão quebrou, problema no destino, cliente não atendeu, trânsito intenso, etc."
                   />
                 </div>
 
                 <div className="flex justify-end space-x-3">
                     <button
-                      onClick={() => setShowCancelModal(false)}
+                      onClick={() => setShowProblemModal(false)}
                       className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-500/20 transition-all duration-200"
                     >
                     Cancelar
                   </button>
                   <button
-                    onClick={confirmCancelRoute}
-                    className="px-6 py-3 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-4 focus:ring-red-500/20 transition-all duration-200"
+                    onClick={confirmReportProblem}
+                    className="px-6 py-3 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 focus:outline-none focus:ring-4 focus:ring-orange-500/20 transition-all duration-200"
                   >
-                    Confirmar Cancelamento
+                    Reportar Problema
                   </button>
                 </div>
               </div>

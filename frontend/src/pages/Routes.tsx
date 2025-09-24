@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MapPin, Trash2, Play, CheckCircle, Clock } from 'lucide-react';
+import { Plus, Search, Filter, MapPin, Trash2, Play, CheckCircle, Clock, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AddRouteModal from '@/components/AddRouteModal';
 import apiService from '@/services/api';
@@ -21,6 +21,8 @@ interface Route {
     id: string;
     name: string;
   };
+  scheduledDate?: string;
+  shift?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -40,6 +42,7 @@ interface RouteExecution {
 
 const Routes: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [duplicateRouteData, setDuplicateRouteData] = useState<Route | null>(null);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [executions, setExecutions] = useState<RouteExecution[]>([]);
   const [loading, setLoading] = useState(false);
@@ -77,6 +80,16 @@ const Routes: React.FC = () => {
     loadRoutes();
   };
 
+  const handleDuplicateRoute = (route: Route) => {
+    setDuplicateRouteData(route);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setDuplicateRouteData(null);
+  };
+
   const getRouteExecutionStatus = (routeId: string) => {
     const execution = executions.find(exec => exec.routeId === routeId);
     return execution?.status || 'pending';
@@ -99,6 +112,25 @@ const Routes: React.FC = () => {
         {config.text}
       </span>
     );
+  };
+
+  const formatShift = (shift: string) => {
+    const shiftConfig = {
+      manha: 'Manhã (06:00 - 12:00)',
+      tarde: 'Tarde (12:00 - 18:00)',
+      noite: 'Noite (18:00 - 00:00)',
+      madrugada: 'Madrugada (00:00 - 06:00)'
+    };
+    return shiftConfig[shift as keyof typeof shiftConfig] || shift;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   };
 
 
@@ -270,10 +302,31 @@ const Routes: React.FC = () => {
                           {route.waypoints && route.waypoints.length > 0 && (
                             <p><strong>Paradas:</strong> {route.waypoints.join(', ')}</p>
                           )}
+                          {(route.scheduledDate || route.shift) && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {route.scheduledDate && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                                  📅 {formatDate(route.scheduledDate)}
+                                </span>
+                              )}
+                              {route.shift && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800">
+                                  🕐 {formatShift(route.shift)}
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleDuplicateRoute(route)}
+                        className="text-blue-600 hover:text-blue-900"
+                        title="Duplicar rota"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </button>
                       <button
                         onClick={() => handleDeleteRoute(route.id, route.name)}
                         className="text-red-600 hover:text-red-900"
@@ -293,8 +346,9 @@ const Routes: React.FC = () => {
       {/* Add Route Modal */}
       <AddRouteModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         onRouteCreated={handleRouteCreated}
+        duplicateRouteData={duplicateRouteData}
       />
     </div>
   );
