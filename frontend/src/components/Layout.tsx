@@ -10,8 +10,6 @@ import {
   LogOut, 
   Menu,
   X,
-  Bell,
-  Settings,
   Moon,
   Sun
 } from 'lucide-react';
@@ -181,12 +179,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex flex-1"></div>
             <div className="flex items-center gap-x-4 lg:gap-x-6">
-              {/* Notifications */}
-              <button className="relative p-2 text-gray-600 hover:text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-              </button>
-              
               {/* Theme Toggle */}
               <button 
                 onClick={toggleTheme}
@@ -196,16 +188,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </button>
               
-              {/* Settings */}
-              <button className="p-2 text-gray-600 hover:text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                <Settings className="h-5 w-5" />
-              </button>
-              
               <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:lg:bg-gray-600" />
               
               {/* User info */}
               <div className="flex items-center gap-x-3">
-                <div className="flex items-center gap-x-3 p-2 rounded-lg hover:bg-gray-50 dark:bg-gray-800 transition-colors">
+                <div className="flex items-center gap-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                   <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center shadow-sm">
                     <span className="text-xs font-semibold text-white">
                       {user?.name?.charAt(0).toUpperCase()}

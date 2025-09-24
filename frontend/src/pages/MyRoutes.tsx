@@ -220,7 +220,7 @@ const MyRoutes: React.FC = () => {
             </p>
           </div>
           <div className="hidden md:block">
-            <div className="w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <div className="w-24 h-24 bg-white/20 dark:bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
               <MapPin className="h-12 w-12 text-white" />
             </div>
           </div>
