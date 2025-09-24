@@ -220,7 +220,7 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
                 <div className="ml-6 flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-black group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
                     Gerenciar Funcionários
                   </h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-400">
