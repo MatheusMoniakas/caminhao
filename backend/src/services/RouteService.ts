@@ -11,7 +11,8 @@ export class RouteService {
         start_point: routeData.startPoint,
         end_point: routeData.endPoint,
         waypoints: routeData.waypoints || [],
-        assigned_employee_id: routeData.assignedEmployeeId,
+        driver_id: routeData.driverId,
+        helper_id: routeData.helperId,
         is_active: true
       })
       .select()
@@ -77,7 +78,8 @@ export class RouteService {
     if (updates.startPoint !== undefined) updateData.start_point = updates.startPoint;
     if (updates.endPoint !== undefined) updateData.end_point = updates.endPoint;
     if (updates.waypoints !== undefined) updateData.waypoints = updates.waypoints;
-    if (updates.assignedEmployeeId !== undefined) updateData.assigned_employee_id = updates.assignedEmployeeId;
+    if (updates.driverId !== undefined) updateData.driver_id = updates.driverId;
+    if (updates.helperId !== undefined) updateData.helper_id = updates.helperId;
     if (updates.isActive !== undefined) updateData.is_active = updates.isActive;
 
     const { data, error } = await supabaseAdmin
@@ -113,7 +115,8 @@ export class RouteService {
       startPoint: data.start_point,
       endPoint: data.end_point,
       waypoints: data.waypoints || [],
-      assignedEmployeeId: data.assigned_employee_id,
+      driverId: data.driver_id,
+      helperId: data.helper_id,
       isActive: data.is_active,
       createdAt: data.created_at,
       updatedAt: data.updated_at

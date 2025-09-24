@@ -16,7 +16,8 @@ interface RouteFormData {
   startPoint: string;
   endPoint: string;
   waypoints: string[];
-  assignedEmployeeId: string;
+  driverId: string;
+  helperId: string;
 }
 
 interface Employee {
@@ -164,41 +165,29 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
             {/* Ponto de Partida */}
             <div>
               <label htmlFor="startPoint" className="block text-sm font-medium text-gray-700">
-                Ponto de Partida *
+                Ponto de Partida
               </label>
               <input
                 type="text"
                 id="startPoint"
-                {...register('startPoint', { 
-                  required: 'Ponto de partida é obrigatório',
-                  minLength: { value: 2, message: 'Ponto de partida deve ter pelo menos 2 caracteres' }
-                })}
+                {...register('startPoint')}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="Ex: Centro da Cidade"
+                placeholder="Ex: Centro da Cidade (opcional)"
               />
-              {errors.startPoint && (
-                <p className="mt-1 text-sm text-red-600">{errors.startPoint.message}</p>
-              )}
             </div>
 
             {/* Ponto de Destino */}
             <div>
               <label htmlFor="endPoint" className="block text-sm font-medium text-gray-700">
-                Ponto de Destino *
+                Ponto de Destino
               </label>
               <input
                 type="text"
                 id="endPoint"
-                {...register('endPoint', { 
-                  required: 'Ponto de destino é obrigatório',
-                  minLength: { value: 2, message: 'Ponto de destino deve ter pelo menos 2 caracteres' }
-                })}
+                {...register('endPoint')}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="Ex: Zona Sul"
+                placeholder="Ex: Zona Sul (opcional)"
               />
-              {errors.endPoint && (
-                <p className="mt-1 text-sm text-red-600">{errors.endPoint.message}</p>
-              )}
             </div>
 
             {/* Pontos de Parada */}
@@ -236,17 +225,41 @@ const AddRouteModal: React.FC<AddRouteModalProps> = ({
               </button>
             </div>
 
-            {/* Funcionário Responsável */}
+            {/* Motorista */}
             <div>
-              <label htmlFor="assignedEmployeeId" className="block text-sm font-medium text-gray-700">
-                Funcionário Responsável
+              <label htmlFor="driverId" className="block text-sm font-medium text-gray-700">
+                Motorista *
               </label>
               <select
-                id="assignedEmployeeId"
-                {...register('assignedEmployeeId')}
+                id="driverId"
+                {...register('driverId', { 
+                  required: 'Motorista é obrigatório'
+                })}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
               >
-                <option value="">Selecione um funcionário (opcional)</option>
+                <option value="">Selecione o motorista</option>
+                {employees.map((employee) => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.name} ({employee.role})
+                  </option>
+                ))}
+              </select>
+              {errors.driverId && (
+                <p className="mt-1 text-sm text-red-600">{errors.driverId.message}</p>
+              )}
+            </div>
+
+            {/* Ajudante */}
+            <div>
+              <label htmlFor="helperId" className="block text-sm font-medium text-gray-700">
+                Ajudante
+              </label>
+              <select
+                id="helperId"
+                {...register('helperId')}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+              >
+                <option value="">Selecione um ajudante (opcional)</option>
                 {employees.map((employee) => (
                   <option key={employee.id} value={employee.id}>
                     {employee.name} ({employee.role})

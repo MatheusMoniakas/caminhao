@@ -8,11 +8,16 @@ interface Route {
   id: string;
   name: string;
   description?: string;
-  startPoint: string;
-  endPoint: string;
+  startPoint?: string;
+  endPoint?: string;
   waypoints: string[];
-  assignedEmployeeId?: string;
-  assignedEmployee?: {
+  driverId: string;
+  helperId?: string;
+  driver?: {
+    id: string;
+    name: string;
+  };
+  helper?: {
     id: string;
     name: string;
   };
@@ -85,8 +90,10 @@ const Routes: React.FC = () => {
 
   const filteredRoutes = routes.filter(route => {
     const matchesSearch = route.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         route.startPoint.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         route.endPoint.toLowerCase().includes(searchTerm.toLowerCase());
+                         (route.startPoint && route.startPoint.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (route.endPoint && route.endPoint.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (route.driver && route.driver.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (route.helper && route.helper.name.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesStatus = statusFilter === '' || 
                          (statusFilter === 'active' && route.isActive) ||
@@ -220,13 +227,16 @@ const Routes: React.FC = () => {
                           )}
                         </div>
                         <div className="mt-1 text-sm text-gray-500">
-                          <p><strong>De:</strong> {route.startPoint}</p>
-                          <p><strong>Para:</strong> {route.endPoint}</p>
+                          {route.startPoint && <p><strong>De:</strong> {route.startPoint}</p>}
+                          {route.endPoint && <p><strong>Para:</strong> {route.endPoint}</p>}
                           {route.description && (
                             <p><strong>Descrição:</strong> {route.description}</p>
                           )}
-                          {route.assignedEmployee && (
-                            <p><strong>Responsável:</strong> {route.assignedEmployee.name}</p>
+                          {route.driver && (
+                            <p><strong>Motorista:</strong> {route.driver.name}</p>
+                          )}
+                          {route.helper && (
+                            <p><strong>Ajudante:</strong> {route.helper.name}</p>
                           )}
                           {route.waypoints && route.waypoints.length > 0 && (
                             <p><strong>Paradas:</strong> {route.waypoints.join(', ')}</p>

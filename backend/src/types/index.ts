@@ -23,10 +23,11 @@ export interface Route {
   id: string;
   name: string;
   description?: string;
-  startPoint: string;
-  endPoint: string;
+  startPoint?: string;
+  endPoint?: string;
   waypoints: string[];
-  assignedEmployeeId?: string;
+  driverId: string;
+  helperId?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -78,10 +79,11 @@ export interface UpdateEmployeeRequest {
 export interface CreateRouteRequest {
   name: string;
   description?: string;
-  startPoint: string;
-  endPoint: string;
+  startPoint?: string;
+  endPoint?: string;
   waypoints?: string[];
-  assignedEmployeeId?: string;
+  driverId: string;
+  helperId?: string;
 }
 
 export interface UpdateRouteRequest {
@@ -90,7 +92,8 @@ export interface UpdateRouteRequest {
   startPoint?: string;
   endPoint?: string;
   waypoints?: string[];
-  assignedEmployeeId?: string;
+  driverId?: string;
+  helperId?: string;
   isActive?: boolean;
 }
 
