@@ -188,6 +188,7 @@ class ApiService {
   async createEmployee(data: {
     name: string;
     email: string;
+    phone?: string;
     password: string;
     role?: string;
   }) {
@@ -208,6 +209,7 @@ class ApiService {
   async updateEmployee(id: string, data: {
     name?: string;
     email?: string;
+    phone?: string;
     role?: string;
   }) {
     const response = await this.api.put(`/employees/${id}`, data);
