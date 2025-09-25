@@ -1,7 +1,17 @@
 import { supabaseAdmin } from '@/config/database';
-import { Route, CreateRouteRequest, UpdateRouteRequest } from '@/types';
+import { Route, CreateRouteRequest, UpdateRouteRequest, User } from '@/types';
+import { WhatsAppService } from './WhatsAppService';
+import { UserService } from './UserService';
 
 export class RouteService {
+  private whatsappService: WhatsAppService;
+  private userService: UserService;
+
+  constructor() {
+    this.whatsappService = new WhatsAppService();
+    this.userService = new UserService();
+  }
+
   async createRoute(routeData: CreateRouteRequest): Promise<Route> {
     // Preparar dados para inserção, convertendo strings vazias para null
     const insertData = {
@@ -30,7 +40,14 @@ export class RouteService {
       throw new Error(`Failed to create route: ${error.message}`);
     }
 
-    return this.mapRouteFromDatabase(data);
+    const createdRoute = this.mapRouteFromDatabase(data);
+
+    // Enviar notificações via WhatsApp (não bloquear a criação da rota se falhar)
+    this.sendWhatsAppNotifications(createdRoute).catch(error => {
+      console.error('Error sending WhatsApp notifications:', error);
+    });
+
+    return createdRoute;
   }
 
   async getRouteById(id: string): Promise<Route | null> {
@@ -131,5 +148,68 @@ export class RouteService {
       createdAt: data.created_at,
       updatedAt: data.updated_at
     };
+  }
+
+  /**
+   * Envia notificações via WhatsApp para motorista e ajudante quando uma rota é criada
+   */
+  private async sendWhatsAppNotifications(route: Route): Promise<void> {
+    try {
+      // Buscar dados do motorista
+      const driver = await this.userService.getUserById(route.driverId);
+      if (!driver) {
+        console.warn(`Driver not found for route ${route.id}`);
+        return;
+      }
+
+      // Buscar dados do ajudante (se existir)
+      let helper: User | null = null;
+      if (route.helperId) {
+        helper = await this.userService.getUserById(route.helperId);
+      }
+
+      // Verificar se os funcionários têm telefone cadastrado
+      if (!driver.phone) {
+        console.warn(`Driver ${driver.name} does not have a phone number registered`);
+        return;
+      }
+
+      if (helper && !helper.phone) {
+        console.warn(`Helper ${helper.name} does not have a phone number registered`);
+      }
+
+      // Preparar dados para a notificação
+      const notificationData = {
+        routeName: route.name,
+        scheduledDate: route.scheduledDate || new Date().toISOString(),
+        shift: route.shift || 'Não especificado',
+        driverName: driver.name,
+        helperName: helper?.name
+      };
+
+      // Enviar notificações
+      const results = await this.whatsappService.sendRouteNotification(
+        driver.phone,
+        helper?.phone,
+        notificationData
+      );
+
+      // Log dos resultados
+      if (results.driverSent) {
+        console.log(`WhatsApp notification sent to driver: ${driver.name} (${driver.phone})`);
+      } else {
+        console.warn(`Failed to send WhatsApp notification to driver: ${driver.name} (${driver.phone})`);
+      }
+
+      if (helper && results.helperSent) {
+        console.log(`WhatsApp notification sent to helper: ${helper.name} (${helper.phone})`);
+      } else if (helper && !results.helperSent) {
+        console.warn(`Failed to send WhatsApp notification to helper: ${helper.name} (${helper.phone})`);
+      }
+
+    } catch (error: any) {
+      console.error('Error in sendWhatsAppNotifications:', error.message);
+      // Não relançar o erro para não afetar a criação da rota
+    }
   }
 }

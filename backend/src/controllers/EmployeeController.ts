@@ -28,6 +28,7 @@ export class EmployeeController {
         email: employeeData.email,
         password: employeeData.password,
         name: employeeData.name,
+        phone: employeeData.phone,
         role: 'employee'
       });
 

@@ -7,6 +7,7 @@ export class UserService {
     email: string;
     password: string;
     name: string;
+    phone?: string;
     role: 'admin' | 'employee';
   }): Promise<User> {
     const hashedPassword = await bcrypt.hash(userData.password, 12);
@@ -17,6 +18,7 @@ export class UserService {
         email: userData.email,
         password: hashedPassword,
         name: userData.name,
+        phone: userData.phone,
         role: userData.role,
         is_active: true
       })
@@ -67,12 +69,14 @@ export class UserService {
   async updateUser(id: string, updates: Partial<{
     name: string;
     email: string;
+    phone: string;
     isActive: boolean;
   }>): Promise<User> {
     const updateData: any = {};
     
     if (updates.name !== undefined) updateData.name = updates.name;
     if (updates.email !== undefined) updateData.email = updates.email;
+    if (updates.phone !== undefined) updateData.phone = updates.phone;
     if (updates.isActive !== undefined) updateData.is_active = updates.isActive;
 
     const { data, error } = await supabaseAdmin
@@ -139,6 +143,7 @@ export class UserService {
       id: data.id,
       email: data.email,
       name: data.name,
+      phone: data.phone,
       role: data.role,
       isActive: data.is_active,
       createdAt: data.created_at,
