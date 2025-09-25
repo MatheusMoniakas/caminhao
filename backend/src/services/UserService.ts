@@ -93,6 +93,63 @@ export class UserService {
     return this.mapUserFromDatabase(data);
   }
 
+  async checkUserDependencies(userId: string): Promise<boolean> {
+    try {
+      // Verificar se o usuário tem rotas associadas (como motorista ou ajudante)
+      const { data: routes, error: routesError } = await supabaseAdmin
+        .from('routes')
+        .select('id')
+        .or(`driver_id.eq.${userId},helper_id.eq.${userId}`)
+        .limit(1);
+
+      if (routesError) {
+        console.error('Error checking routes dependencies:', routesError);
+        return true; // Em caso de erro, assumir que tem dependências por segurança
+      }
+
+      if (routes && routes.length > 0) {
+        return true; // Tem rotas associadas
+      }
+
+      // Verificar se o usuário tem execuções de rotas associadas
+      const { data: executions, error: executionsError } = await supabaseAdmin
+        .from('route_executions')
+        .select('id')
+        .eq('employee_id', userId)
+        .limit(1);
+
+      if (executionsError) {
+        console.error('Error checking route executions dependencies:', executionsError);
+        return true; // Em caso de erro, assumir que tem dependências por segurança
+      }
+
+      if (executions && executions.length > 0) {
+        return true; // Tem execuções de rotas associadas
+      }
+
+      // Verificar se o usuário tem rotas atribuídas (coluna antiga)
+      const { data: assignedRoutes, error: assignedError } = await supabaseAdmin
+        .from('routes')
+        .select('id')
+        .eq('assigned_employee_id', userId)
+        .limit(1);
+
+      if (assignedError) {
+        console.error('Error checking assigned routes dependencies:', assignedError);
+        return true; // Em caso de erro, assumir que tem dependências por segurança
+      }
+
+      if (assignedRoutes && assignedRoutes.length > 0) {
+        return true; // Tem rotas atribuídas
+      }
+
+      return false; // Não tem dependências
+    } catch (error) {
+      console.error('Error in checkUserDependencies:', error);
+      return true; // Em caso de erro, assumir que tem dependências por segurança
+    }
+  }
+
   async deleteUser(id: string): Promise<void> {
     const { error } = await supabaseAdmin
       .from('users')

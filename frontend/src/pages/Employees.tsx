@@ -8,6 +8,7 @@ interface Employee {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   role: string;
   isActive: boolean;
   createdAt: string;
@@ -90,16 +91,18 @@ const Employees: React.FC = () => {
     doc.setFontSize(12);
     doc.text(`Nome: ${employee.name}`, 20, 70);
     doc.text(`Email: ${employee.email}`, 20, 80);
-    doc.text(`Função: ${employee.role === 'admin' ? 'Administrador' : employee.role === 'driver' ? 'Motorista' : 'Funcionário'}`, 20, 90);
-    doc.text(`Status: ${employee.isActive ? 'Ativo' : 'Inativo'}`, 20, 100);
-    doc.text(`Data de Admissão: ${new Date(employee.createdAt).toLocaleDateString('pt-BR')}`, 20, 110);
+    doc.text(`Telefone: ${employee.phone || 'Não informado'}`, 20, 90);
+    doc.text(`Função: ${employee.role === 'admin' ? 'Administrador' : employee.role === 'driver' ? 'Motorista' : 'Funcionário'}`, 20, 100);
+    doc.text(`Status: ${employee.isActive ? 'Ativo' : 'Inativo'}`, 20, 110);
+    doc.text(`Data de Admissão: ${new Date(employee.createdAt).toLocaleDateString('pt-BR')}`, 20, 120);
     
     if (!employee.isActive && employee.updatedAt) {
-      doc.text(`Data de Demissão: ${new Date(employee.updatedAt).toLocaleDateString('pt-BR')}`, 20, 120);
+      doc.text(`Data de Demissão: ${new Date(employee.updatedAt).toLocaleDateString('pt-BR')}`, 20, 130);
     }
 
     // Data de geração
-    doc.text(`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, 140);
+    const yPosition = !employee.isActive && employee.updatedAt ? 150 : 140;
+    doc.text(`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, yPosition);
 
       // Salvar o PDF
       doc.save(`funcionario_${employee.name.replace(/\s+/g, '_')}.pdf`);
@@ -265,6 +268,9 @@ const Employees: React.FC = () => {
                       Email
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Telefone
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Função
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -298,6 +304,11 @@ const Employees: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900 dark:text-white">{employee.email}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-white">
+                          {employee.phone || '-'}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">

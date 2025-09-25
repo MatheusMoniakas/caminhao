@@ -173,17 +173,37 @@ export class EmployeeController {
         return;
       }
 
+      // Verificar se o funcionário tem dependências antes de tentar excluir
+      const hasDependencies = await this.userService.checkUserDependencies(id);
+      if (hasDependencies) {
+        res.status(400).json({
+          success: false,
+          error: 'Não é possível excluir este funcionário pois ele possui rotas ou execuções de rotas associadas. Desative o funcionário em vez de excluí-lo.'
+        });
+        return;
+      }
+
       await this.userService.deleteUser(id);
 
       res.json({
         success: true,
         message: 'Employee deleted successfully'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Delete employee error:', error);
+      
+      // Verificar se é erro de constraint de foreign key
+      if (error.message && error.message.includes('violates foreign key constraint')) {
+        res.status(400).json({
+          success: false,
+          error: 'Não é possível excluir este funcionário pois ele possui rotas associadas. Desative o funcionário em vez de excluí-lo.'
+        });
+        return;
+      }
+      
       res.status(500).json({
         success: false,
-        error: 'Internal server error'
+        error: error.message || 'Internal server error'
       });
     }
   }

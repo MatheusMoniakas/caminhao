@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Mail, Lock, UserCheck } from 'lucide-react';
+import { X, User, Mail, Lock, UserCheck, Phone } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import apiService from '@/services/api';
@@ -13,6 +13,7 @@ interface AddEmployeeModalProps {
 interface EmployeeFormData {
   name: string;
   email: string;
+  phone: string;
   password: string;
   confirmPassword: string;
   role: string;
@@ -49,6 +50,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
       await apiService.createEmployee({
         name: data.name,
         email: data.email,
+        phone: data.phone,
         password: data.password,
         role: data.role,
       });
@@ -136,6 +138,32 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
               </div>
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              )}
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                Telefone
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  {...register('phone', {
+                    pattern: {
+                      value: /^[0-9\s\(\)\-\+]+$/,
+                      message: 'Telefone deve conter apenas números, espaços, parênteses, hífens e +',
+                    },
+                  })}
+                  type="tel"
+                  className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                  placeholder="(11) 99999-9999"
+                />
+              </div>
+              {errors.phone && (
+                <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
               )}
             </div>
 
