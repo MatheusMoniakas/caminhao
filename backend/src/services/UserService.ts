@@ -49,6 +49,23 @@ export class UserService {
     return this.mapUserFromDatabase(data);
   }
 
+  async getUserByName(name: string): Promise<User | null> {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('name', name)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // User not found
+      }
+      throw new Error(`Failed to get user by name: ${error.message}`);
+    }
+
+    return this.mapUserFromDatabase(data);
+  }
+
   async getUserById(id: string): Promise<User | null> {
     const { data, error } = await supabaseAdmin
       .from('users')
@@ -147,6 +164,45 @@ export class UserService {
     } catch (error) {
       console.error('Error in checkUserDependencies:', error);
       return true; // Em caso de erro, assumir que tem dependências por segurança
+    }
+  }
+
+  async forceDeleteUser(id: string): Promise<void> {
+    try {
+      // 1. Remover execuções de rotas associadas
+      await supabaseAdmin
+        .from('route_executions')
+        .delete()
+        .eq('employee_id', id);
+
+      // 2. Atualizar rotas que têm este usuário como motorista ou ajudante
+      await supabaseAdmin
+        .from('routes')
+        .update({ driver_id: null })
+        .eq('driver_id', id);
+
+      await supabaseAdmin
+        .from('routes')
+        .update({ helper_id: null })
+        .eq('helper_id', id);
+
+      // 3. Atualizar rotas que têm este usuário como assigned_employee_id
+      await supabaseAdmin
+        .from('routes')
+        .update({ assigned_employee_id: null })
+        .eq('assigned_employee_id', id);
+
+      // 4. Finalmente, deletar o usuário
+      const { error } = await supabaseAdmin
+        .from('users')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw new Error(`Failed to force delete user: ${error.message}`);
+      }
+    } catch (error: any) {
+      throw new Error(`Failed to force delete user: ${error.message}`);
     }
   }
 

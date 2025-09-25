@@ -71,7 +71,24 @@ const Employees: React.FC = () => {
         }
       } catch (error: any) {
         const errorMessage = error.response?.data?.error || 'Erro ao excluir funcionário';
-        toast.error(errorMessage);
+        
+        // Se o erro menciona dependências, oferecer exclusão forçada
+        if (errorMessage.includes('dependências') || errorMessage.includes('associadas')) {
+          if (window.confirm(`${errorMessage}\n\nDeseja excluir mesmo assim? Isso removerá todas as dependências.`)) {
+            try {
+              const forceResponse = await apiService.deleteEmployee(id, true);
+              if (forceResponse.success) {
+                toast.success('Funcionário excluído com sucesso (exclusão forçada)!');
+                loadEmployees();
+              }
+            } catch (forceError: any) {
+              const forceErrorMessage = forceError.response?.data?.error || 'Erro ao excluir funcionário';
+              toast.error(forceErrorMessage);
+            }
+          }
+        } else {
+          toast.error(errorMessage);
+        }
       }
     }
   };

@@ -146,7 +146,25 @@ const Routes: React.FC = () => {
         }
       } catch (error: any) {
         console.error('Erro ao excluir rota:', error);
-        toast.error(error.response?.data?.error || 'Erro ao excluir rota');
+        const errorMessage = error.response?.data?.error || 'Erro ao excluir rota';
+        
+        // Se o erro menciona dependências, oferecer exclusão forçada
+        if (errorMessage.includes('dependências') || errorMessage.includes('associadas')) {
+          if (window.confirm(`${errorMessage}\n\nDeseja excluir mesmo assim? Isso removerá todas as dependências.`)) {
+            try {
+              const forceResponse = await apiService.deleteRoute(routeId, true);
+              if (forceResponse.success) {
+                toast.success('Rota excluída com sucesso (exclusão forçada)!');
+                loadRoutes();
+              }
+            } catch (forceError: any) {
+              const forceErrorMessage = forceError.response?.data?.error || 'Erro ao excluir rota';
+              toast.error(forceErrorMessage);
+            }
+          }
+        } else {
+          toast.error(errorMessage);
+        }
       }
     }
   };

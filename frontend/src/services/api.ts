@@ -136,8 +136,8 @@ class ApiService {
     return response.data;
   }
 
-  async deleteRoute(id: string) {
-    const response = await this.api.delete(`/routes/${id}`);
+  async deleteRoute(id: string, force: boolean = false) {
+    const response = await this.api.delete(`/routes/${id}${force ? '?force=true' : ''}`);
     return response.data;
   }
 
@@ -216,8 +216,8 @@ class ApiService {
     return response.data;
   }
 
-  async deleteEmployee(id: string) {
-    const response = await this.api.delete(`/employees/${id}`);
+  async deleteEmployee(id: string, force: boolean = false) {
+    const response = await this.api.delete(`/employees/${id}${force ? '?force=true' : ''}`);
     return response.data;
   }
 

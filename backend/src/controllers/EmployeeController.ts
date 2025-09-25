@@ -13,12 +13,22 @@ export class EmployeeController {
     try {
       const employeeData: CreateEmployeeRequest = req.body;
 
-      // Check if user already exists
-      const existingUser = await this.userService.getUserByEmail(employeeData.email);
-      if (existingUser) {
+      // Check if user already exists by email
+      const existingUserByEmail = await this.userService.getUserByEmail(employeeData.email);
+      if (existingUserByEmail) {
         res.status(400).json({
           success: false,
-          error: 'Employee already exists with this email'
+          error: 'Já existe um funcionário com este email'
+        });
+        return;
+      }
+
+      // Check if user already exists by name
+      const existingUserByName = await this.userService.getUserByName(employeeData.name);
+      if (existingUserByName) {
+        res.status(400).json({
+          success: false,
+          error: 'Já existe um funcionário com este nome'
         });
         return;
       }
@@ -37,11 +47,11 @@ export class EmployeeController {
         data: employee,
         message: 'Employee created successfully'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Create employee error:', error);
       res.status(500).json({
         success: false,
-        error: 'Internal server error'
+        error: error.message || 'Internal server error'
       });
     }
   }
@@ -154,6 +164,7 @@ export class EmployeeController {
   async deleteEmployee(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      const { force } = req.query; // Parâmetro para exclusão forçada
 
       // Check if employee exists
       const existingEmployee = await this.userService.getUserById(id);
@@ -173,33 +184,31 @@ export class EmployeeController {
         return;
       }
 
-      // Verificar se o funcionário tem dependências antes de tentar excluir
-      const hasDependencies = await this.userService.checkUserDependencies(id);
-      if (hasDependencies) {
-        res.status(400).json({
-          success: false,
-          error: 'Não é possível excluir este funcionário pois ele possui rotas ou execuções de rotas associadas. Desative o funcionário em vez de excluí-lo.'
-        });
-        return;
+      // Se não for exclusão forçada, verificar dependências
+      if (force !== 'true') {
+        const hasDependencies = await this.userService.checkUserDependencies(id);
+        if (hasDependencies) {
+          res.status(400).json({
+            success: false,
+            error: 'Não é possível excluir este funcionário pois ele possui rotas ou execuções de rotas associadas. Use force=true para exclusão forçada.'
+          });
+          return;
+        }
       }
 
-      await this.userService.deleteUser(id);
+      // Exclusão forçada: remover dependências primeiro
+      if (force === 'true') {
+        await this.userService.forceDeleteUser(id);
+      } else {
+        await this.userService.deleteUser(id);
+      }
 
       res.json({
         success: true,
-        message: 'Employee deleted successfully'
+        message: force === 'true' ? 'Employee force deleted successfully' : 'Employee deleted successfully'
       });
     } catch (error: any) {
       console.error('Delete employee error:', error);
-      
-      // Verificar se é erro de constraint de foreign key
-      if (error.message && error.message.includes('violates foreign key constraint')) {
-        res.status(400).json({
-          success: false,
-          error: 'Não é possível excluir este funcionário pois ele possui rotas associadas. Desative o funcionário em vez de excluí-lo.'
-        });
-        return;
-      }
       
       res.status(500).json({
         success: false,

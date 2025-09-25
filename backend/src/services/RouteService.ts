@@ -67,6 +67,23 @@ export class RouteService {
     return this.mapRouteFromDatabase(data);
   }
 
+  async getRouteByName(name: string): Promise<Route | null> {
+    const { data, error } = await supabaseAdmin
+      .from('routes')
+      .select('*')
+      .eq('name', name)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // Route not found
+      }
+      throw new Error(`Failed to get route by name: ${error.message}`);
+    }
+
+    return this.mapRouteFromDatabase(data);
+  }
+
   async getAllRoutes(): Promise<Route[]> {
     const { data, error } = await supabaseAdmin
       .from('routes')
@@ -119,6 +136,53 @@ export class RouteService {
     }
 
     return this.mapRouteFromDatabase(data);
+  }
+
+  async checkRouteDependencies(routeId: string): Promise<boolean> {
+    try {
+      // Verificar se a rota tem execuções associadas
+      const { data: executions, error: executionsError } = await supabaseAdmin
+        .from('route_executions')
+        .select('id')
+        .eq('route_id', routeId)
+        .limit(1);
+
+      if (executionsError) {
+        console.error('Error checking route executions dependencies:', executionsError);
+        return true; // Em caso de erro, assumir que tem dependências por segurança
+      }
+
+      if (executions && executions.length > 0) {
+        return true; // Tem execuções de rotas associadas
+      }
+
+      return false; // Não tem dependências
+    } catch (error) {
+      console.error('Error in checkRouteDependencies:', error);
+      return true; // Em caso de erro, assumir que tem dependências por segurança
+    }
+  }
+
+  async forceDeleteRoute(id: string): Promise<void> {
+    try {
+      // 1. Remover execuções de rotas associadas
+      await supabaseAdmin
+        .from('route_executions')
+        .delete()
+        .eq('route_id', id);
+
+      // 2. Deletar a rota
+      const { error } = await supabaseAdmin
+        .from('routes')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw new Error(`Failed to force delete route: ${error.message}`);
+      }
+    } catch (error: any) {
+      throw new Error(`Failed to force delete route: ${error.message}`);
+    }
   }
 
   async deleteRoute(id: string): Promise<void> {

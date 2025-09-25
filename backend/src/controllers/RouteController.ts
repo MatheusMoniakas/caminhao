@@ -14,6 +14,16 @@ export class RouteController {
       const routeData: CreateRouteRequest = req.body;
       console.log('Creating route with data:', routeData);
       
+      // Check if route already exists by name
+      const existingRoute = await this.routeService.getRouteByName(routeData.name);
+      if (existingRoute) {
+        res.status(400).json({
+          success: false,
+          error: 'Já existe uma rota com este nome'
+        });
+        return;
+      }
+      
       const route = await this.routeService.createRoute(routeData);
 
       res.status(201).json({
@@ -135,6 +145,7 @@ export class RouteController {
   async deleteRoute(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      const { force } = req.query; // Parâmetro para exclusão forçada
 
       // Check if route exists
       const existingRoute = await this.routeService.getRouteById(id);
@@ -146,17 +157,34 @@ export class RouteController {
         return;
       }
 
-      await this.routeService.deleteRoute(id);
+      // Se não for exclusão forçada, verificar dependências
+      if (force !== 'true') {
+        const hasDependencies = await this.routeService.checkRouteDependencies(id);
+        if (hasDependencies) {
+          res.status(400).json({
+            success: false,
+            error: 'Não é possível excluir esta rota pois ela possui execuções associadas. Use force=true para exclusão forçada.'
+          });
+          return;
+        }
+      }
+
+      // Exclusão forçada: remover dependências primeiro
+      if (force === 'true') {
+        await this.routeService.forceDeleteRoute(id);
+      } else {
+        await this.routeService.deleteRoute(id);
+      }
 
       res.json({
         success: true,
-        message: 'Route deleted successfully'
+        message: force === 'true' ? 'Route force deleted successfully' : 'Route deleted successfully'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Delete route error:', error);
       res.status(500).json({
         success: false,
-        error: 'Internal server error'
+        error: error.message || 'Internal server error'
       });
     }
   }
