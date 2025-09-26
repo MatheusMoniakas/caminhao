@@ -1,4 +1,4 @@
-# Caminhão - Sistema de Gestão de Rotas
+# 🚛 Sistema de Gestão de Rotas de Caminhões
 
 Sistema completo para gestão de rotas de caminhões com funcionalidades de cadastro de funcionários, criação de rotas, execução de entregas e relatórios.
 
@@ -20,6 +20,7 @@ Sistema completo para gestão de rotas de caminhões com funcionalidades de cada
 - **JWT** para autenticação
 - **Joi** para validação
 - **Bcrypt** para hash de senhas
+- **WhatsApp Integration** com Baileys
 
 ## 📁 Estrutura do Projeto
 
@@ -216,14 +217,14 @@ O sistema utiliza JWT com refresh token para autenticação:
 
 ## 🚀 Deploy
 
-### Frontend (Netlify)
-1. Conecte o repositório ao Netlify
+### Frontend
+1. Conecte o repositório ao seu provedor (Netlify, Vercel, etc.)
 2. Configure as variáveis de ambiente
 3. Build command: `cd frontend && npm run build`
 4. Publish directory: `frontend/dist`
 
-### Backend (Render/Railway)
-1. Conecte o repositório
+### Backend
+1. Conecte o repositório ao seu provedor (Render, Railway, etc.)
 2. Configure as variáveis de ambiente
 3. Build command: `cd backend && npm run build`
 4. Start command: `cd backend && npm start`

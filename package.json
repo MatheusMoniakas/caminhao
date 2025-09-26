@@ -24,10 +24,7 @@
     "format:backend": "cd backend && npm run format",
     "check-setup": "node scripts/check-setup.js",
     "test-database": "node scripts/test-database.js",
-    "create-admin": "cd backend && npm run create-admin",
-    "prepare-deploy": "node scripts/deploy-frontend.js",
-    "deploy-frontend": "node scripts/deploy-frontend-only.js",
-    "test-backend-build": "node scripts/test-backend-build.js"
+    "create-admin": "cd backend && npm run create-admin"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

@@ -114,3 +114,23 @@ temp/
 
 # Supabase
 .supabase/
+
+# WhatsApp Baileys
+backend/scripts/baileys-server/auth_info_default/
+backend/scripts/baileys-server/sessions/
+
+# Deployment files
+*.sh
+render.yaml
+netlify.toml
+vercel.json
+railway.json
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# OS specific
+.DS_Store
+Thumbs.db
