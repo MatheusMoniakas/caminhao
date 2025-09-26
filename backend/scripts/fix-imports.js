@@ -30,15 +30,23 @@ function getRelativePath(fromFile, toPath) {
   const fromDir = path.dirname(fromFile);
   let toFile = path.join('dist', toPath);
   
-  // Se o arquivo não tem extensão, adicionar .js
+  // Se o arquivo não tem extensão, verificar se é uma pasta com index.js
   if (!path.extname(toFile)) {
-    toFile += '.js';
+    const indexPath = path.join(toFile, 'index.js');
+    if (fs.existsSync(indexPath)) {
+      toFile = indexPath;
+    } else {
+      toFile += '.js';
+    }
   }
   
   const relativePath = path.relative(fromDir, toFile);
   
+  // Normalizar separadores de caminho para funcionar em qualquer OS
+  const normalizedPath = relativePath.replace(/\\/g, '/');
+  
   // Garantir que o caminho comece com ./
-  return relativePath.startsWith('.') ? relativePath : './' + relativePath;
+  return normalizedPath.startsWith('.') ? normalizedPath : './' + normalizedPath;
 }
 
 // Função para processar todos os arquivos .js na pasta dist
