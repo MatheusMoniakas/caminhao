@@ -132,7 +132,7 @@ export const getMeasurementId = (): string => {
  */
 export const isAnalyticsEnabled = (): boolean => {
   const measurementId = getMeasurementId();
-  return measurementId && measurementId !== 'G-XXXXXXXXXX' && measurementId !== 'G-DEV-XXXXXXXXXX';
+  return Boolean(measurementId && measurementId !== 'G-XXXXXXXXXX' && measurementId !== 'G-DEV-XXXXXXXXXX');
 };
 
 /**

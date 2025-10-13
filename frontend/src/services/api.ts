@@ -2,6 +2,15 @@ import axios, { AxiosInstance } from 'axios';
 import toast from 'react-hot-toast';
 import { analytics } from './analytics';
 
+// Estender o tipo do Axios para incluir metadata
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    metadata?: {
+      startTime: number;
+    };
+  }
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 class ApiService {
