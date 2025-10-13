@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import toast from 'react-hot-toast';
+import { analytics } from './analytics';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -19,10 +20,14 @@ class ApiService {
   }
 
   private setupInterceptors() {
-    // Request interceptor to add auth token
+    // Request interceptor to add auth token and track performance
     this.api.interceptors.request.use(
       (config) => {
         console.log('Request interceptor called for:', config.url);
+        
+        // Add performance tracking
+        config.metadata = { startTime: performance.now() };
+        
         const token = localStorage.getItem('accessToken');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
@@ -37,10 +42,49 @@ class ApiService {
       }
     );
 
-    // Response interceptor to handle token refresh
+    // Response interceptor to handle token refresh and track performance
     this.api.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        // Track successful API calls
+        if (response.config.metadata?.startTime) {
+          const duration = performance.now() - response.config.metadata.startTime;
+          const endpoint = response.config.url?.replace(API_BASE_URL, '') || 'unknown';
+          const method = response.config.method?.toUpperCase() || 'GET';
+          
+          analytics.trackEvent({
+            action: 'api_success',
+            category: 'api_performance',
+            label: `${method}_${endpoint}`,
+            value: Math.round(duration),
+            custom_parameters: {
+              endpoint: endpoint,
+              method: method,
+              status: response.status,
+            },
+          });
+        }
+        return response;
+      },
       async (error) => {
+        // Track failed API calls
+        if (error.config?.metadata?.startTime) {
+          const duration = performance.now() - error.config.metadata.startTime;
+          const endpoint = error.config.url?.replace(API_BASE_URL, '') || 'unknown';
+          const method = error.config.method?.toUpperCase() || 'GET';
+          
+          analytics.trackEvent({
+            action: 'api_error',
+            category: 'api_performance',
+            label: `${method}_${endpoint}`,
+            value: Math.round(duration),
+            custom_parameters: {
+              endpoint: endpoint,
+              method: method,
+              status: error.response?.status || 0,
+              error_message: error.message,
+            },
+          });
+        }
         const originalRequest = error.config;
 
         if (error.response?.status === 401 && !originalRequest._retry) {

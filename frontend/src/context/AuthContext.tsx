@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, AuthContextType, RegisterRequest } from '@/types';
 import apiService from '@/services/api';
+import { analytics } from '@/services/analytics';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,6 +53,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('refreshToken', refreshToken);
         setUser(userData);
         
+        // Analytics tracking
+        analytics.trackLogin('email');
+        analytics.setUserProperties(userData.id.toString(), userData.role);
+        
         // Verify tokens were saved
         const savedToken = localStorage.getItem('accessToken');
         console.log('Token saved verification:', savedToken ? savedToken.substring(0, 20) + '...' : 'null');
@@ -62,6 +67,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || error.message || 'Erro ao fazer login';
+      
+      // Analytics tracking for login errors
+      analytics.trackLoginError(error.response?.status?.toString() || 'unknown');
+      
       toast.error(errorMessage);
       throw error;
     } finally {
@@ -81,6 +90,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('refreshToken', refreshToken);
         setUser(userData);
         
+        // Analytics tracking
+        analytics.trackLogin('registration');
+        analytics.setUserProperties(userData.id.toString(), userData.role);
+        
         toast.success(`Conta criada com sucesso! Bem-vindo, ${userData.name}!`);
       } else {
         throw new Error(response.error || 'Registration failed');
@@ -95,6 +108,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
+    // Analytics tracking
+    analytics.trackLogout();
+    analytics.clearUserProperties();
+    
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     setUser(null);
